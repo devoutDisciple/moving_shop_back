@@ -8,6 +8,6 @@ const router = (app) => {
 	// 店铺相关
 	app.use('/shop', shopController);
 	// 订单相关
-	app.use('/shop', orderController);
+	app.use('/order', orderController);
 };
 module.exports = router;
