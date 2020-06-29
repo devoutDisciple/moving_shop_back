@@ -20,8 +20,7 @@ app.use(
 		name: 'session_id', // 在浏览器中生成cookie的名称key，默认是connect.sid
 	}),
 );
-
-app.use(express.static('/Users/zhangzhen/moving/assert'));
+app.use(express.static(path.join(__dirname, './public')));
 
 app.use(function (req, res, next) {
 	if (req.url === '/pay/getAlipayResult') {
