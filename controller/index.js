@@ -2,6 +2,7 @@ const accountController = require('./accountController');
 const shopController = require('./shopController');
 const orderController = require('./orderController');
 const cabinetController = require('./cabinetController');
+const clothingController = require('./clothingController');
 
 const router = (app) => {
 	// 账户相关
@@ -12,5 +13,7 @@ const router = (app) => {
 	app.use('/order', orderController);
 	// 洗衣柜相关
 	app.use('/cabinet', cabinetController);
+	// 衣物相关
+	app.use('/clothing', clothingController);
 };
 module.exports = router;
