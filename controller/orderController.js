@@ -27,4 +27,19 @@ router.post('/openCellById', (req, res) => {
 	orderService.openCellById(req, res);
 });
 
+// 店员确定订单
+router.post('/sureOrder', (req, res) => {
+	orderService.sureOrder(req, res);
+});
+
+// 店员存放衣物 随机打开柜子
+router.post('/openCellByRandomByCabinetId', (req, res) => {
+	orderService.openCellByRandomByCabinetId(req, res);
+});
+
+// 更改衣物状态
+router.post('/updateOrderStatus', (req, res) => {
+	orderService.updateOrderStatus(req, res);
+});
+
 module.exports = router;

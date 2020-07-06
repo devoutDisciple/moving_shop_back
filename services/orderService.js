@@ -61,6 +61,18 @@ module.exports = {
 		}
 	},
 
+	// 更改订单状态
+	updateOrderStatus: async (req, res) => {
+		try {
+			let { orderid, status } = req.body;
+			await orderModel.update({ status: status }, { where: { id: orderid } });
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
+
 	// 分页获取订单 通过shopid
 	getOrderByShopidAndPage: async (req, res) => {
 		try {
@@ -154,6 +166,7 @@ module.exports = {
 			let result = responseUtil.renderFieldsObj(order, [
 				'id',
 				'code',
+				'boxid',
 				'shopid',
 				'goods',
 				'money',
@@ -228,9 +241,67 @@ module.exports = {
 			);
 			// 更新订单状态
 			await orderModel.update({ status: status }, { where: { id: orderId } });
-			setTimeout(() => {
-				res.send(resultMessage.success('success'));
-			}, 3000);
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
+
+	// 店员存放衣物 随机打开柜子
+	openCellByRandomByCabinetId: async (req, res) => {
+		try {
+			let { cabinetId, orderId, type } = req.body;
+			// 获取token
+			let boxLoginDetail = await cabinetUtil.getToken();
+			boxLoginDetail = JSON.parse(boxLoginDetail);
+			let token = boxLoginDetail.data || '';
+			if (!token) return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+			// 打开柜子
+			let result = await cabinetUtil.openCellSave(cabinetId, token, type);
+			// 打开后可用的格子的数量
+			let used = result.used;
+			// 更新可用格子状态
+			await cabinetModel.update(
+				{ used: JSON.stringify(used) },
+				{
+					where: {
+						id: cabinetId,
+					},
+				},
+			);
+			// 更新订单状态
+			await orderModel.update(
+				{
+					status: status,
+					boxid: result.boxid,
+					cabinetId: cabinetId,
+					cellid: result.cellid,
+					modify_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+				},
+				{ where: { id: orderId } },
+			);
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
+
+	// 店员确定订单
+	sureOrder: async (req, res) => {
+		try {
+			let { orderId, goods, totalPrice } = req.body;
+			// 更新订单状态
+			await orderModel.update(
+				{
+					goods: JSON.stringify(goods),
+					money: totalPrice,
+					is_sure: 2,
+				},
+				{ where: { id: orderId } },
+			);
+			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));

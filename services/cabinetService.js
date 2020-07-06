@@ -15,7 +15,7 @@ module.exports = {
 				},
 				order: [['sort', 'DESC']],
 			});
-			let result = responseUtil.renderFieldsAll(cabinets, ['name', 'address', 'boxid', 'url', 'used', 'total']);
+			let result = responseUtil.renderFieldsAll(cabinets, ['id', 'name', 'address', 'boxid', 'url', 'used', 'total']);
 			result.map((item) => {
 				let usedNum = JSON.parse(item.used).length;
 				item.usedNum = usedNum;

@@ -63,7 +63,7 @@ module.exports = {
 	},
 
 	// 存放衣物打开柜子
-	openCellSave: (cabinetId, boxid, token, type) => {
+	openCellSave: (cabinetId, token, type) => {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let data = await CabinetModel.findOne({
@@ -71,7 +71,8 @@ module.exports = {
 						id: cabinetId,
 					},
 				});
-				let used = JSON.parse(data.used);
+				let boxid = data.boxid,
+					used = JSON.parse(data.used);
 				let allBox = type === 'smallBox' ? config.box_samll_num : config.box_big_num;
 				let emptyCell = [];
 				allBox.forEach((item) => {
@@ -103,12 +104,15 @@ module.exports = {
 						form: { boxid: boxid, cellid: cellid },
 					},
 					function (error, response, body) {
-						let data = '{ "code": 200, "message": "No Box Information" }';
+						// {"code":400,"message":"BUSY","value":0,"data":null} 错误
+						// let data = '{ "code": 200, "message": "No Box Information" }'; // 测试环境
+						console.log(body, 1111);
+						let data = body; // 真实环境
 						if (error) return reject(data);
 						let result = JSON.parse(data);
 						if (result && result.code === 200) {
 							used.push(cellid);
-							return resolve({ code: 200, success: true, data: cellid, used: used });
+							return resolve({ code: 200, success: true, data: cellid, used: used, boxid: boxid });
 						}
 						return reject({ code: 400, success: false, message: '打开格子失败，请稍后重试' });
 					},
@@ -147,8 +151,11 @@ module.exports = {
 						headers: params,
 						form: { boxid: boxid, cellid: cellid },
 					},
-					function (error) {
-						let data = '{ "code": 200, "message": "No Box Information" }';
+					function (error, response, body) {
+						// {"code":400,"message":"BUSY","value":0,"data":null} 错误
+						// let data = '{ "code": 200, "message": "No Box Information" }'; // 测试环境
+						console.log(body, 1111);
+						let data = body; // 真实环境
 						if (error) return reject(data);
 						let result = JSON.parse(data);
 						if (result && result.code === 200) {
