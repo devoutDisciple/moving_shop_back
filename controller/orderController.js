@@ -42,4 +42,9 @@ router.post('/updateOrderStatus', (req, res) => {
 	orderService.updateOrderStatus(req, res);
 });
 
+// 店员录入订单 addOrderByShoper
+router.post('/addOrderByShoper', (req, res) => {
+	orderService.addOrderByShoper(req, res);
+});
+
 module.exports = router;

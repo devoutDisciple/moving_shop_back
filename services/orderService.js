@@ -1,5 +1,6 @@
 const resultMessage = require('../util/resultMessage');
 const sequelize = require('../dataSource/MysqlPoolClass');
+
 const order = require('../models/order');
 const orderModel = order(sequelize);
 
@@ -15,10 +16,11 @@ const user = require('../models/user');
 const userModel = user(sequelize);
 orderModel.belongsTo(userModel, { foreignKey: 'userid', targetKey: 'id', as: 'userDetail' });
 
-const CountUtil = require('../util/CountUtil');
-const responseUtil = require('../util/responseUtil');
 const moment = require('moment');
+const CountUtil = require('../util/CountUtil');
+const ObjectUtil = require('../util/ObjectUtil');
 const cabinetUtil = require('../util/cabinetUtil');
+const responseUtil = require('../util/responseUtil');
 
 module.exports = {
 	// 获取订单统计销量和总金额
@@ -26,9 +28,11 @@ module.exports = {
 		try {
 			let shopid = req.query.shopid;
 			let orderTotalNum = await orderModel.count({ where: { shopid: shopid } });
-			let orderTotalMoney = await orderModel.sum('money', { where: { shopid: shopid, status: 5 } });
-			console.log(orderTotalNum, orderTotalMoney);
-			res.send(resultMessage.success({ orderTotalNum, orderTotalMoney }));
+			let orderMoneyTotalMoney = await orderModel.sum('money', { where: { shopid: shopid, status: 5 } });
+			let orderSendMoneyTotalMoney = await orderModel.sum('send_money', { where: { shopid: shopid, status: 5 } });
+			let totalMoney = (Number(orderMoneyTotalMoney) + Number(orderSendMoneyTotalMoney)).toFixed(2);
+			console.log(orderMoneyTotalMoney, orderSendMoneyTotalMoney);
+			res.send(resultMessage.success({ orderTotalNum, totalMoney }));
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error({}));
@@ -45,16 +49,18 @@ module.exports = {
 			// 清洗中订单
 			let orderType2 = await orderModel.count({ where: { shopid: shopid, status: 2 } });
 			// 待付款订单
-			let orderType3 = await orderModel.count({ where: { shopid: shopid, status: 3 } });
+			let orderType3 = await orderModel.count({ where: { shopid: shopid, status: [3, 4] } });
 			// 用户未收取订单
-			let orderType4 = await orderModel.count({ where: { shopid: shopid, status: 4 } });
+			let orderType4 = await orderModel.count({ where: { shopid: shopid, status: [3, 4] } });
 			// 已完成订单
 			let orderType5 = await orderModel.count({ where: { shopid: shopid, status: 5 } });
 			// 上门取衣订单
-			let orderType6 = await orderModel.count({ where: { shopid: shopid, status: 6 } });
+			let orderType6 = await orderModel.count({ where: { shopid: shopid, status: [6, 8] } });
 			// 积分兑换订单
 			let orderType7 = await orderModel.count({ where: { shopid: shopid, status: 7 } });
-			res.send(resultMessage.success({ orderType1, orderType2, orderType3, orderType4, orderType5, orderType6, orderType7 }));
+			// 待派送订单
+			let orderType9 = await orderModel.count({ where: { shopid: shopid, status: 9 } });
+			res.send(resultMessage.success({ orderType1, orderType2, orderType3, orderType4, orderType5, orderType6, orderType7, orderType9 }));
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error({}));
@@ -77,6 +83,9 @@ module.exports = {
 	getOrderByShopidAndPage: async (req, res) => {
 		try {
 			let { current = 1, pagesize = 10, shopid, status } = req.query;
+			if (status == 6) status = [6, 8];
+			if (status == 3) status = [3, 4];
+			if (status == 4) status = [3, 4];
 			let offset = CountUtil.getInt((current - 1) * pagesize);
 			let orders = await orderModel.findAll({
 				where: {
@@ -124,7 +133,7 @@ module.exports = {
 					item.cabinetBoxId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['boxid'] || '' : '';
 				}
 				//上门取衣
-				if (item.order_type === 2) {
+				if (item.order_type === 2 || item.order_type === 4) {
 					item.home_address = orders[index] ? orders[index]['home_address'] || '' : '';
 					item.home_username = orders[index] ? orders[index]['home_username'] || '' : '';
 					item.home_phone = orders[index] ? orders[index]['home_phone'] || '' : '';
@@ -186,7 +195,7 @@ module.exports = {
 				result.cabinetUrl = order.cabinetDetail ? order.cabinetDetail.url : '';
 			}
 			//上门取衣
-			if (result.order_type === 2) {
+			if (result.order_type === 2 || result.order_type === 4) {
 				result.home_address = order ? order['home_address'] || '' : '';
 				result.home_username = order ? order['home_username'] || '' : '';
 				result.home_phone = order ? order['home_phone'] || '' : '';
@@ -301,6 +310,34 @@ module.exports = {
 				},
 				{ where: { id: orderId } },
 			);
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
+
+	// 店员录入订单
+	addOrderByShoper: async (req, res) => {
+		try {
+			let { home_username, home_phone, home_address, money, desc, shopid, userid } = req.body;
+			let code = ObjectUtil.createOrderCode();
+			// 更新订单状态
+			await orderModel.create({
+				code,
+				shopid,
+				goods: '[]',
+				home_username,
+				home_phone,
+				home_address,
+				desc,
+				money,
+				order_type: 4,
+				send_people: userid, // 是谁录入的
+				is_sure: 2,
+				status: 2,
+				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+			});
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);

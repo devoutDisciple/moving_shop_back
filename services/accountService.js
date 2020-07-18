@@ -34,6 +34,7 @@ module.exports = {
 			if (!user || password != user.password) return res.send(resultMessage.specilError(400, '用户名或密码错误!'));
 			res.send(
 				resultMessage.success({
+					id: user.id,
 					username: user.username,
 					shopid: user.shopid,
 					role: user.role,
