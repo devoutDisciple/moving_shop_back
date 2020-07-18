@@ -17,4 +17,14 @@ router.post('/deleteById', (req, res) => {
 	clothingService.deleteById(req, res);
 });
 
+// 更新衣物 updateClothing
+router.post('/updateClothing', (req, res) => {
+	clothingService.updateClothing(req, res);
+});
+
+// getDetailById
+router.get('/getDetailById', (req, res) => {
+	clothingService.getDetailById(req, res);
+});
+
 module.exports = router;

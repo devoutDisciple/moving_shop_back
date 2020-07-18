@@ -15,7 +15,7 @@ module.exports = {
 				},
 				order: [['sort', 'DESC']],
 			});
-			let result = responseUtil.renderFieldsAll(clothings, ['id', 'shopid', 'name', 'price']);
+			let result = responseUtil.renderFieldsAll(clothings, ['id', 'shopid', 'name', 'price', 'sort']);
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);
@@ -28,6 +28,43 @@ module.exports = {
 		let body = req.body;
 		try {
 			await ClothingModel.create(body);
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error([]));
+		}
+	},
+
+	// 获取衣物详情
+	getDetailById: async (req, res) => {
+		let { id } = req.query;
+		try {
+			let detail = await ClothingModel.findOne({ where: { id: id } });
+			let result = responseUtil.renderFieldsObj(detail, ['id', 'shopid', 'name', 'price', 'sort']);
+			result.sortNum = String(result.sort);
+			res.send(resultMessage.success(result));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error([]));
+		}
+	},
+
+	// 更改衣物详情
+	updateClothing: async (req, res) => {
+		let { data } = req.body;
+		try {
+			await ClothingModel.update(
+				{
+					name: data.name,
+					price: data.price,
+					sort: data.sort,
+				},
+				{
+					where: {
+						id: data.id,
+					},
+				},
+			);
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);
