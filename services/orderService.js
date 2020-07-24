@@ -178,9 +178,11 @@ module.exports = {
 				'boxid',
 				'shopid',
 				'goods',
+				'origin_money',
 				'money',
 				'pre_pay',
 				'send_money',
+				'discount',
 				'desc',
 				'status',
 				'order_type',
@@ -190,6 +192,7 @@ module.exports = {
 				'create_time',
 			]);
 			result.create_time = moment(result.create_time).format('YYYY-MM-DD HH:mm:ss');
+			result.weekDay = moment(result.create_time).day();
 			if (result.order_type === 1) {
 				result.cabinetAddress = order.cabinetDetail ? order.cabinetDetail.address : '';
 				result.cabinetUrl = order.cabinetDetail ? order.cabinetDetail.url : '';
