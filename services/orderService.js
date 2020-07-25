@@ -22,6 +22,8 @@ const ObjectUtil = require('../util/ObjectUtil');
 const cabinetUtil = require('../util/cabinetUtil');
 const responseUtil = require('../util/responseUtil');
 
+const PostMessage = require('../util/PostMessage');
+
 module.exports = {
 	// 获取订单统计销量和总金额
 	getAllSalesNum: async (req, res) => {
@@ -271,8 +273,15 @@ module.exports = {
 			if (!token) return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 			// 打开柜子
 			let result = await cabinetUtil.openCellSave(cabinetId, token, type);
+			if (!result) {
+				return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+			}
+			if (result && result.code !== 200) {
+				return res.send(resultMessage.error(result.message));
+			}
 			// 打开后可用的格子的数量
 			let used = result.used;
+			console.log(used);
 			// 更新可用格子状态
 			await cabinetModel.update(
 				{ used: JSON.stringify(used) },
@@ -303,17 +312,37 @@ module.exports = {
 	// 店员确定订单
 	sureOrder: async (req, res) => {
 		try {
-			let { orderId, goods, totalPrice } = req.body;
+			// originMoney: originPrice,
+			// discount: discount,
+			let { orderId, goods, totalPrice, originMoney, discount } = req.body;
 			// 更新订单状态
 			await orderModel.update(
 				{
 					goods: JSON.stringify(goods),
 					money: totalPrice,
 					is_sure: 2,
+					origin_money: originMoney,
+					discount,
 				},
 				{ where: { id: orderId } },
 			);
 			res.send(resultMessage.success('success'));
+			// message_sureOrderMoneyToUser
+			let order = await orderModel.findOne({
+				where: { id: orderId },
+				include: [
+					{
+						model: userModel,
+						as: 'userDetail',
+					},
+				],
+			});
+			let phone = '';
+			if (order.order_type == 1) phone = order.userDetail.phone;
+			if (order.order_type == 2) phone = order.home_phone;
+			if (order.order_type == 3) phone = order.intergral_phone;
+			if (!phone) return;
+			PostMessage.sendMessageSureMoneyToUser(phone, order.code);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));

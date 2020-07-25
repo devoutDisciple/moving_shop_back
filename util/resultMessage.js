@@ -14,7 +14,7 @@ module.exports = {
 		return {
 			code: 500,
 			success: false,
-			message: err.message,
+			message: err.message || err,
 		};
 	},
 	errorMsg: (data) => {

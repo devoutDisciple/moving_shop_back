@@ -2,6 +2,7 @@ const resultMessage = require('../util/resultMessage');
 const responseUtil = require('../util/responseUtil');
 const sequelize = require('../dataSource/MysqlPoolClass');
 const cabinet = require('../models/cabinet');
+const cabinetUtil = require('../util/cabinetUtil');
 const cabinetModal = cabinet(sequelize);
 
 module.exports = {
@@ -20,6 +21,7 @@ module.exports = {
 				let usedNum = JSON.parse(item.used).length;
 				item.usedNum = usedNum;
 				item.abledNum = 29 - usedNum;
+				item.usedState = cabinetUtil.getBoxUsedState(item.used);
 			});
 			res.send(resultMessage.success(result));
 		} catch (error) {
