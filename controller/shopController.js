@@ -12,4 +12,9 @@ router.post('/updateShopDetail', (req, res) => {
 	shopService.updateShopDetail(req, res);
 });
 
+// 修改用户头像
+router.post('/addPhoto', (req, res) => {
+	shopService.addPhoto(req, res);
+});
+
 module.exports = router;
