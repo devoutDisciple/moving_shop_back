@@ -5,6 +5,8 @@ const cabinetController = require('./cabinetController');
 const clothingController = require('./clothingController');
 const blillController = require('./blillController');
 const versionController = require('./versionController');
+const mockController = require('./mockController');
+const printerController = require('./printController');
 
 const router = (app) => {
 	// 账户相关
@@ -19,7 +21,11 @@ const router = (app) => {
 	app.use('/clothing', clothingController);
 	// 金额相关
 	app.use('/bill', blillController);
+	// 打印相关
+	app.use('/print', printerController);
 	// 版本
 	app.use('/version', versionController);
+	// mock相关
+	app.use('/mock', mockController);
 };
 module.exports = router;
