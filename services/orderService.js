@@ -230,7 +230,7 @@ module.exports = {
 	// 打开柜子
 	openCellById: async (req, res) => {
 		try {
-			let { orderId, status } = req.body;
+			let { orderId, status, optid } = req.body;
 			let order = await orderModel.findOne({
 				where: { id: orderId },
 			});
@@ -241,7 +241,7 @@ module.exports = {
 			let token = boxLoginDetail.data || '';
 			if (!token) return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 			// 打开柜子
-			let result = await cabinetUtil.openCellGet(cabinetId, boxid, cellid, token);
+			let result = await cabinetUtil.openCellGet(cabinetId, boxid, cellid, token, optid);
 			// 打开后可用的格子的数量
 			let used = result.used;
 			// 更新可用格子状态
@@ -265,14 +265,14 @@ module.exports = {
 	// 店员存放衣物 随机打开柜子
 	openCellByRandomByCabinetId: async (req, res) => {
 		try {
-			let { cabinetId, orderId, type, status } = req.body;
+			let { cabinetId, orderId, type, status, userid } = req.body;
 			// 获取token
 			let boxLoginDetail = await cabinetUtil.getToken();
 			boxLoginDetail = JSON.parse(boxLoginDetail);
 			let token = boxLoginDetail.data || '';
 			if (!token) return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 			// 打开柜子
-			let result = await cabinetUtil.openCellSave(cabinetId, token, type);
+			let result = await cabinetUtil.openCellSave(cabinetId, token, type, userid);
 			if (!result) {
 				return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 			}

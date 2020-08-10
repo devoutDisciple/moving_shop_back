@@ -6,6 +6,38 @@ const sequelize = require('../dataSource/MysqlPoolClass');
 const ObjectUtil = require('./ObjectUtil');
 const cabinet = require('../models/cabinet');
 const CabinetModel = cabinet(sequelize);
+const except = require('../models/exception');
+const exceptionModel = except(sequelize);
+const saveException = async (result, userid, boxid, cabinetid, cellid) => {
+	try {
+		let data = JSON.parse(result);
+		let flag = 2; //默认失败
+		if (data && data.code === 200) {
+			flag = 1;
+		}
+		exceptionModel.create({
+			success: flag,
+			result: result,
+			optid: userid,
+			user_type: 1,
+			boxid: boxid,
+			cabinetid: cabinetid,
+			cellid: cellid,
+			create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+		});
+	} catch (error) {
+		exceptionModel.create({
+			success: 2,
+			result: String(result),
+			optid: userid,
+			user_type: 1,
+			boxid: boxid,
+			cabinetid: cabinetid,
+			cellid: cellid,
+			create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+		});
+	}
+};
 
 module.exports = {
 	// 获取token
@@ -63,7 +95,7 @@ module.exports = {
 	},
 
 	// 存放衣物打开柜子
-	openCellSave: (cabinetId, token, type) => {
+	openCellSave: (cabinetId, token, type, userid) => {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let data = await CabinetModel.findOne({
@@ -107,6 +139,7 @@ module.exports = {
 						// {"code":400,"message":"BUSY","value":0,"data":null} 错误
 						// let data = '{ "code": 200, "message": "No Box Information" }'; // 测试环境
 						console.log(body, 1111);
+						saveException(body, userid, boxid, cabinetId, cellid);
 						let data = body; // 真实环境
 						if (error) {
 							console.log(error, ' ---网络错误');
@@ -129,7 +162,7 @@ module.exports = {
 	},
 
 	// 取出衣物
-	openCellGet: (cabinetId, boxid, cellid, token) => {
+	openCellGet: (cabinetId, boxid, cellid, token, userid) => {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let data = await CabinetModel.findOne({
@@ -159,6 +192,7 @@ module.exports = {
 						// {"code":400,"message":"BUSY","value":0,"data":null} 错误
 						// let data = '{ "code": 200, "message": "No Box Information" }'; // 测试环境
 						console.log(body, 1111);
+						saveException(body, userid, boxid, cabinetId, cellid);
 						let data = body; // 真实环境
 						if (error) return reject(data);
 						let result = JSON.parse(data);
