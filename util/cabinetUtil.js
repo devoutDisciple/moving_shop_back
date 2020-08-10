@@ -108,12 +108,16 @@ module.exports = {
 						// let data = '{ "code": 200, "message": "No Box Information" }'; // 测试环境
 						console.log(body, 1111);
 						let data = body; // 真实环境
-						if (error) return reject(data);
+						if (error) {
+							console.log(error, ' ---网络错误');
+							return reject(data);
+						}
 						let result = JSON.parse(data);
 						if (result && result.code === 200) {
 							used.push(cellid);
 							return resolve({ code: 200, success: true, data: cellid, used: used, boxid: boxid });
 						}
+						console.log(body, ' ---打开格口失败');
 						return reject({ code: 400, success: false, message: '打开格子失败，请稍后重试' });
 					},
 				);

@@ -265,7 +265,7 @@ module.exports = {
 	// 店员存放衣物 随机打开柜子
 	openCellByRandomByCabinetId: async (req, res) => {
 		try {
-			let { cabinetId, orderId, type } = req.body;
+			let { cabinetId, orderId, type, status } = req.body;
 			// 获取token
 			let boxLoginDetail = await cabinetUtil.getToken();
 			boxLoginDetail = JSON.parse(boxLoginDetail);
@@ -303,6 +303,23 @@ module.exports = {
 				{ where: { id: orderId } },
 			);
 			res.send(resultMessage.success('success'));
+			// 查询订单详情 , 发送信息
+			let cabinetDetail = await cabinetModel.findOne({ where: { id: cabinetId } });
+			let orderDetail = await orderModel.findOne({
+				where: { id: orderId },
+				include: [
+					{
+						model: userModel,
+						as: 'userDetail',
+					},
+				],
+			});
+			let phone = '';
+			if (orderDetail.order_type == 1) phone = orderDetail.userDetail.phone;
+			if (orderDetail.order_type == 2) phone = orderDetail.home_phone;
+			if (orderDetail.order_type == 3) phone = orderDetail.intergral_phone;
+			if (!phone) return;
+			PostMessage.sendMessageSaveClothingToUser(phone, orderDetail.code, cabinetDetail.address);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));

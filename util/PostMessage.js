@@ -168,6 +168,28 @@ module.exports = {
 		});
 	},
 
+	// 发送存放衣物通知给用户
+	sendMessageSaveClothingToUser: (phoneNum, code, address) => {
+		var params = {
+			RegionId: 'cn-hangzhou',
+			PhoneNumbers: phoneNum,
+			SignName: config.notify_message_sign,
+			TemplateCode: config.message_saveClothingToUser,
+			TemplateParam: JSON.stringify({ code: code, address: address }),
+		};
+		return new Promise((resolve, reject) => {
+			client.request('SendSms', params, requestOption).then(
+				() => {
+					resolve({ phoneNum });
+				},
+				(ex) => {
+					reject('发送失败');
+					console.log(ex);
+				},
+			);
+		});
+	},
+
 	// 随机的验证码
 	getMessageCode: () => {
 		//eslint-disable-next-line
