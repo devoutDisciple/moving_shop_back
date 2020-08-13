@@ -117,6 +117,7 @@ module.exports = {
 				'money',
 				'desc',
 				'status',
+				'urgency',
 				'is_sure',
 				'create_time',
 				'order_type',
@@ -186,6 +187,7 @@ module.exports = {
 				'send_money',
 				'discount',
 				'desc',
+				'urgency',
 				'status',
 				'order_type',
 				'cabinetId',
@@ -369,7 +371,7 @@ module.exports = {
 	// 店员录入订单
 	addOrderByShoper: async (req, res) => {
 		try {
-			let { home_username, home_phone, home_address, money, desc, shopid, userid } = req.body;
+			let { home_username, home_phone, home_address, desc, shopid, userid, urgency } = req.body;
 			let code = ObjectUtil.createOrderCode();
 			// 更新订单状态
 			await orderModel.create({
@@ -380,11 +382,11 @@ module.exports = {
 				home_phone,
 				home_address,
 				desc,
-				money,
 				order_type: 4,
 				send_people: userid, // 是谁录入的
 				is_sure: 2,
 				status: 2,
+				urgency: urgency,
 				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 			});
 			res.send(resultMessage.success('success'));
