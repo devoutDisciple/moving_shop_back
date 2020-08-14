@@ -120,6 +120,7 @@ module.exports = {
 				'urgency',
 				'is_sure',
 				'create_time',
+				'modify_time',
 				'order_type',
 				'money',
 				'cellid',
@@ -127,14 +128,11 @@ module.exports = {
 			result.forEach((item, index) => {
 				item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
 				item.shopName = orders[index]['shopDetail'] ? orders[index]['shopDetail']['name'] || '' : '';
-				// 快递柜下单
-				if (item.order_type === 1) {
-					item.cabinetId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['id'] || '' : '';
-					item.cabinetUrl = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['url'] || '' : '';
-					item.cabinetName = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['name'] || '' : '';
-					item.cabinetAdderss = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['address'] || '' : '';
-					item.cabinetBoxId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['boxid'] || '' : '';
-				}
+				item.cabinetId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['id'] || '' : '';
+				item.cabinetUrl = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['url'] || '' : '';
+				item.cabinetName = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['name'] || '' : '';
+				item.cabinetAdderss = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['address'] || '' : '';
+				item.cabinetBoxId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['boxid'] || '' : '';
 				//上门取衣
 				if (item.order_type === 2 || item.order_type === 4) {
 					item.home_address = orders[index] ? orders[index]['home_address'] || '' : '';
@@ -194,13 +192,14 @@ module.exports = {
 				'cellid',
 				'is_sure',
 				'create_time',
+				'modify_time',
 			]);
 			result.create_time = moment(result.create_time).format('YYYY-MM-DD HH:mm:ss');
+			result.modify_time = result.modify_time ? moment(result.modify_time).format('YYYY-MM-DD HH:mm:ss') : '';
 			result.weekDay = moment(result.create_time).day();
-			if (result.order_type === 1) {
-				result.cabinetAddress = order.cabinetDetail ? order.cabinetDetail.address : '';
-				result.cabinetUrl = order.cabinetDetail ? order.cabinetDetail.url : '';
-			}
+			result.cabinetAddress = order.cabinetDetail ? order.cabinetDetail.address : '';
+			result.cabinetName = order.cabinetDetail ? order.cabinetDetail.name : '';
+			result.cabinetUrl = order.cabinetDetail ? order.cabinetDetail.url : '';
 			//上门取衣
 			if (result.order_type === 2 || result.order_type === 4) {
 				result.home_address = order ? order['home_address'] || '' : '';
