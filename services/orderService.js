@@ -24,6 +24,8 @@ const responseUtil = require('../util/responseUtil');
 
 const PostMessage = require('../util/PostMessage');
 
+const config = require('../config/AppConfig');
+
 module.exports = {
 	// 获取订单统计销量和总金额
 	getAllSalesNum: async (req, res) => {
@@ -228,7 +230,7 @@ module.exports = {
 		}
 	},
 
-	// 打开柜子
+	// 打开柜子, 取出衣物
 	openCellById: async (req, res) => {
 		try {
 			let { orderId, status, optid } = req.body;
@@ -298,12 +300,15 @@ module.exports = {
 					status: status,
 					boxid: result.boxid,
 					cabinetId: cabinetId,
-					cellid: result.cellid,
+					cellid: result.data,
 					modify_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 				},
 				{ where: { id: orderId } },
 			);
 			res.send(resultMessage.success('success'));
+
+			if (config.send_message_flag === 2) return;
+
 			// 查询订单详情 , 发送信息
 			let cabinetDetail = await cabinetModel.findOne({ where: { id: cabinetId } });
 			let orderDetail = await orderModel.findOne({
@@ -345,6 +350,9 @@ module.exports = {
 				{ where: { id: orderId } },
 			);
 			res.send(resultMessage.success('success'));
+
+			if (config.send_message_flag === 2) return;
+
 			// message_sureOrderMoneyToUser
 			let order = await orderModel.findOne({
 				where: { id: orderId },
