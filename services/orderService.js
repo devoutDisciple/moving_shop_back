@@ -1,5 +1,6 @@
 const resultMessage = require('../util/resultMessage');
 const sequelize = require('../dataSource/MysqlPoolClass');
+const MoneyUtil = require('../util/MoneyUtil');
 
 const order = require('../models/order');
 const orderModel = order(sequelize);
@@ -121,20 +122,24 @@ module.exports = {
 				'status',
 				'urgency',
 				'is_sure',
+				'discount',
 				'create_time',
 				'modify_time',
+				'send_status',
 				'order_type',
 				'money',
 				'cellid',
 			]);
 			result.forEach((item, index) => {
 				item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
+				item.modify_time ? (item.modify_time = moment(item.modify_time).format('YYYY-MM-DD HH:mm:ss')) : null;
 				item.shopName = orders[index]['shopDetail'] ? orders[index]['shopDetail']['name'] || '' : '';
 				item.cabinetId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['id'] || '' : '';
 				item.cabinetUrl = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['url'] || '' : '';
 				item.cabinetName = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['name'] || '' : '';
 				item.cabinetAdderss = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['address'] || '' : '';
 				item.cabinetBoxId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['boxid'] || '' : '';
+				MoneyUtil.countMoney(item);
 				//上门取衣
 				if (item.order_type === 2 || item.order_type === 4) {
 					item.home_address = orders[index] ? orders[index]['home_address'] || '' : '';
@@ -193,6 +198,7 @@ module.exports = {
 				'cabinetId',
 				'cellid',
 				'is_sure',
+				'send_status',
 				'create_time',
 				'modify_time',
 			]);
@@ -202,6 +208,7 @@ module.exports = {
 			result.cabinetAddress = order.cabinetDetail ? order.cabinetDetail.address : '';
 			result.cabinetName = order.cabinetDetail ? order.cabinetDetail.name : '';
 			result.cabinetUrl = order.cabinetDetail ? order.cabinetDetail.url : '';
+			MoneyUtil.countMoney(result);
 			//上门取衣
 			if (result.order_type === 2 || result.order_type === 4) {
 				result.home_address = order ? order['home_address'] || '' : '';
