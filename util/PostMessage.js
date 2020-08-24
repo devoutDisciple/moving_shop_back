@@ -1,6 +1,5 @@
 const Core = require('@alicloud/pop-core');
 const config = require('../config/AppConfig');
-const moment = require('moment');
 const requestOption = {
 	method: 'POST',
 };
@@ -27,116 +26,6 @@ module.exports = {
 				(result) => {
 					console.log(JSON.stringify(result));
 					resolve({ phoneNum, code });
-				},
-				(ex) => {
-					reject('发送失败');
-					console.log(ex);
-				},
-			);
-		});
-	},
-
-	// 发送下单成功通知给用户
-	sendOrderStartToUser: (phoneNum) => {
-		var params = {
-			RegionId: 'cn-hangzhou',
-			PhoneNumbers: phoneNum,
-			SignName: config.notify_message_sign,
-			TemplateCode: config.message_orderStartToUser,
-			TemplateParam: JSON.stringify({ name: 'MOVING' }), //模板变量值 {"code":"1111"} 对应的模板的${code}
-		};
-		return new Promise((resolve, reject) => {
-			client.request('SendSms', params, requestOption).then(
-				(result) => {
-					console.log(JSON.stringify(result));
-					resolve({ phoneNum });
-				},
-				(ex) => {
-					reject('发送失败');
-					console.log(ex);
-				},
-			);
-		});
-	},
-
-	// 发送订单通知给商家
-	sendOrderStartToShop: (shopPhone, username, userPhone) => {
-		var params = {
-			RegionId: 'cn-hangzhou',
-			PhoneNumbers: shopPhone,
-			SignName: config.notify_message_sign,
-			TemplateCode: config.message_orderStartToShop,
-			TemplateParam: JSON.stringify({ name: username, time: moment().format('YYYY-MM-DD HH:mm:ss'), phone: userPhone }),
-		};
-		return new Promise((resolve, reject) => {
-			client.request('SendSms', params, requestOption).then(
-				() => {
-					resolve({ shopPhone });
-				},
-				(ex) => {
-					reject('发送失败');
-					console.log(ex);
-				},
-			);
-		});
-	},
-
-	// 发送订单完成通知给用户
-	sendOrderSuccessToUser: (phoneNum) => {
-		var params = {
-			RegionId: 'cn-hangzhou',
-			PhoneNumbers: phoneNum,
-			SignName: config.notify_message_sign,
-			TemplateCode: config.message_orderSuccessToUser,
-			TemplateParam: JSON.stringify({ name: 'MOVING' }),
-		};
-		return new Promise((resolve, reject) => {
-			client.request('SendSms', params, requestOption).then(
-				() => {
-					resolve({ phoneNum });
-				},
-				(ex) => {
-					reject('发送失败');
-					console.log(ex);
-				},
-			);
-		});
-	},
-
-	// 发送订单完成通知给商家
-	sendOrderSuccessToShop: (phoneNum, code) => {
-		var params = {
-			RegionId: 'cn-hangzhou',
-			PhoneNumbers: phoneNum,
-			SignName: config.notify_message_sign,
-			TemplateCode: config.message_orderSuccessToShop,
-			TemplateParam: JSON.stringify({ code: code }),
-		};
-		return new Promise((resolve, reject) => {
-			client.request('SendSms', params, requestOption).then(
-				() => {
-					resolve({ phoneNum });
-				},
-				(ex) => {
-					reject('发送失败');
-					console.log(ex);
-				},
-			);
-		});
-	},
-
-	// 发送山门取衣预约成功通知给用户 message_getClothingSuccessToUser
-	sendMessageGetClothingSuccessToUser: (phoneNum) => {
-		var params = {
-			RegionId: 'cn-hangzhou',
-			PhoneNumbers: phoneNum,
-			SignName: config.notify_message_sign,
-			TemplateCode: config.message_getClothingSuccessToUser,
-		};
-		return new Promise((resolve, reject) => {
-			client.request('SendSms', params, requestOption).then(
-				() => {
-					resolve({ phoneNum });
 				},
 				(ex) => {
 					reject('发送失败');
