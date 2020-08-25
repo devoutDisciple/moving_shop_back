@@ -224,6 +224,7 @@ module.exports = {
 				result.intergral_num = order ? order['intergral_num'] || '' : '';
 			}
 			result.userDetail = {};
+			result.userDetail.id = order && order['userDetail'] ? order.userDetail.id : '';
 			result.userDetail.username = order && order['userDetail'] ? order.userDetail.username : '';
 			result.userDetail.phone = order && order['userDetail'] ? order.userDetail.phone : '';
 			result.userDetail.addresss = order && order['userDetail'] ? order.userDetail.addresss : '';

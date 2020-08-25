@@ -6,6 +6,7 @@ const clothingController = require('./clothingController');
 const blillController = require('./blillController');
 const versionController = require('./versionController');
 const mockController = require('./mockController');
+const addressController = require('./addressController');
 const printerController = require('./printController');
 
 const router = (app) => {
@@ -25,6 +26,8 @@ const router = (app) => {
 	app.use('/print', printerController);
 	// 版本
 	app.use('/version', versionController);
+	// 地址相关
+	app.use('/address', addressController);
 	// mock相关
 	app.use('/mock', mockController);
 };
