@@ -6,6 +6,8 @@ const FilterStatus = require('./FilterStatus');
 const moment = require('moment');
 const AppConfig = require('../config/AppConfig');
 
+const MoneyUtil = require('./MoneyUtil');
+
 const order = require('../models/order');
 const orderModel = order(sequelize);
 
@@ -46,6 +48,7 @@ module.exports = {
 						},
 					],
 				});
+				MoneyUtil.countMoney(orderDetail);
 				let userDetail = orderDetail.userDetail;
 				let shopDetail = orderDetail.shopDetail;
 				let orderInfo = '';
@@ -67,23 +70,27 @@ module.exports = {
 						orderInfo += `该用户暂未添加衣物<BR>`;
 					} else {
 						goods.forEach((item) => {
-							orderInfo += `${item.name} * ${item.num}   ${item.price}元<BR>`;
+							let itemMoney = Number(item.price * item.num).toFixed(2);
+							orderInfo += `${item.name} * ${item.num}   ${itemMoney}元<BR>`;
 						});
 					}
 					orderInfo += '<BR>';
 					orderInfo += '--------------------------------<BR>';
 					orderInfo += '<BR>';
-					orderInfo += `订单类型：${orderDetail.code}<BR>`;
 					orderInfo += `订单编号：${orderDetail.code}<BR>`;
-					orderInfo += `存放柜子：${cabinetDetail.name}<BR>`;
-					orderInfo += `存放地址：${cabinetDetail.address} ${orderDetail.cellid}号格口<BR>`;
+					orderInfo += `是否加急：${orderDetail.urgency === 2 ? '普通订单' : '加急订单'}<BR>`;
+					orderInfo += `存放地址：${cabinetDetail.address}<BR>`;
+					orderInfo += `存放柜子：${cabinetDetail.name} ${orderDetail.cellid}号格口<BR>`;
 					orderInfo += `用户名称：${userDetail.username}<BR>`;
 					orderInfo += `联系电话：${userDetail.phone}<BR>`;
-					orderInfo += `柜子使用费：${orderDetail.pre_pay} 元<BR>`;
-					orderInfo += `派送费：${orderDetail.send_money} 元<BR>`;
-					orderInfo += `原价：${orderDetail.origin_money} 元<BR>`;
-					orderInfo += `折扣：${orderDetail.discount} 折<BR>`;
-					orderInfo += `合计：${orderDetail.money} 元<BR>`;
+					orderInfo += `柜子使用费：${Number(orderDetail.pre_pay).toFixed(2)} 元<BR>`;
+					orderInfo += `派送费：${Number(orderDetail.send_money).toFixed(2)} 元<BR>`;
+					orderInfo += `原价：${orderDetail.money} 元<BR>`;
+					if (orderDetail.urgency === 2) {
+						orderInfo += `加急费用：${orderDetail.urgencyMoney} 元<BR>`;
+					}
+					orderInfo += `优惠：${orderDetail.subDiscountMoney} 元<BR>`;
+					orderInfo += `应付金额：${orderDetail.payMoney} 元<BR>`;
 					orderInfo += `备注：${orderDetail.desc || '无'}<BR>`;
 					orderInfo += `状态：${orderDetail.is_sure === 1 ? '待确认洗衣价格' : '已确认洗衣费用'}<BR>`;
 					orderInfo += `下单时间: ${moment().format('YYYY-MM-DD HH:mm:ss')}<BR><BR>`;
@@ -97,6 +104,7 @@ module.exports = {
 					// orderInfo += '<C>-------------</C><BR>'; //标题字体如需居中放大,就需要用标签套上
 					orderInfo += '<BR>';
 					orderInfo += `订单类型：预约上门取衣<BR>`;
+					orderInfo += `是否加急：${orderDetail.urgency === 2 ? '普通订单' : '加急订单'}<BR>`;
 					orderInfo += '<BR>';
 					orderInfo += '-------------------------------<BR>';
 					orderInfo += `预约信息：<BR>`;
@@ -152,6 +160,7 @@ module.exports = {
 					orderInfo += '<BR>';
 					orderInfo += '-------------------------------<BR>';
 					orderInfo += `订单编号：${orderDetail.code}<BR>`;
+					orderInfo += `是否加急：${orderDetail.urgency === 2 ? '普通订单' : '加急订单'}<BR>`;
 					orderInfo += `用户名称：${orderDetail.home_username}<BR>`;
 					orderInfo += `联系方式：${orderDetail.home_phone || '无'}<BR>`;
 					orderInfo += `用户地址：${orderDetail.home_address || '无'}<BR>`;
@@ -159,6 +168,46 @@ module.exports = {
 					orderInfo += `下单时间：${moment(orderDetail.create_time).format('YYYY-MM-DD HH:mm:ss')}<BR>`;
 					orderInfo += '-------------------------------<BR>';
 					orderInfo += '<BR>';
+					orderInfo += '<QR>MOVING</QR>';
+				}
+
+				// 店内下单
+				if (orderDetail.order_type === 5) {
+					if (!shopDetail.sn || !shopDetail.key) return '暂无打印机编号';
+					let goods = orderDetail.goods;
+					goods = JSON.parse(goods);
+					orderInfo = '<CB>【 MOVING洗衣 】</CB><BR>'; //标题字体如需居中放大,就需要用标签套上
+					// orderInfo += '<C>-------------</C><BR>'; //标题字体如需居中放大,就需要用标签套上
+					orderInfo += '<BR>';
+					orderInfo += `订单类型：店内下单<BR>`;
+					orderInfo += '<BR>';
+					orderInfo += '-------------------------------<BR>';
+					orderInfo += '<BR>';
+					orderInfo += `衣物概况：<BR>`;
+					if (goods.length === 0) {
+						orderInfo += `该用户暂未添加衣物<BR>`;
+					} else {
+						goods.forEach((item) => {
+							let itemMoney = Number(item.price * item.num).toFixed(2);
+							orderInfo += `${item.name} * ${item.num}   ${itemMoney}元<BR>`;
+						});
+					}
+					orderInfo += '<BR>';
+					orderInfo += '--------------------------------<BR>';
+					orderInfo += '<BR>';
+					orderInfo += `订单编号：${orderDetail.code}<BR>`;
+					orderInfo += `是否加急：${orderDetail.urgency === 2 ? '普通订单' : '加急订单'}<BR>`;
+					orderInfo += `用户名称：${userDetail.username}<BR>`;
+					orderInfo += `联系电话：${userDetail.phone}<BR>`;
+					orderInfo += `原价：${orderDetail.money} 元<BR>`;
+					if (orderDetail.urgency === 2) {
+						orderInfo += `加急费用：${orderDetail.urgencyMoney} 元<BR>`;
+					}
+					orderInfo += `优惠：${orderDetail.subDiscountMoney} 元<BR>`;
+					orderInfo += `应付金额：${orderDetail.payMoney} 元<BR>`;
+					orderInfo += `备注：${orderDetail.desc || '无'}<BR>`;
+					orderInfo += `配送方式：${orderDetail.send_status == 1 ? 'MOVING洗衣柜' : '用户自取'}<BR>`;
+					orderInfo += `下单时间: ${moment().format('YYYY-MM-DD HH:mm:ss')}<BR><BR>`;
 					orderInfo += '<QR>MOVING</QR>';
 				}
 				// 打印机编号

@@ -5,7 +5,7 @@ module.exports = {
 	getMockFlag: async (req, res) => {
 		try {
 			// 要审核的app版本 跳转到mock页面
-			let versionList = ['1.3.0'],
+			let versionList = ['1.3.1'],
 				flag = 1,
 				{ version } = req.query;
 			if (versionList.includes(version)) {
