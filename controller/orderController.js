@@ -47,4 +47,9 @@ router.post('/addOrderByShoper', (req, res) => {
 	orderService.addOrderByShoper(req, res);
 });
 
+// 完成清洗
+router.post('/successClear', (req, res) => {
+	orderService.successClear(req, res);
+});
+
 module.exports = router;

@@ -383,6 +383,18 @@ module.exports = {
 		}
 	},
 
+	// 完成派送
+	successClear: async (req, res) => {
+		try {
+			let { orderid } = req.body;
+			await orderModel.update({ send_home: 2, status: 3 }, { where: { id: orderid } });
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
+
 	// 店员录入订单
 	addOrderByShoper: async (req, res) => {
 		try {
