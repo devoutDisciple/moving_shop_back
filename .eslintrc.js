@@ -1,29 +1,20 @@
 module.exports = {
-	'env': {
-		'browser': true,
-		'commonjs': true,
-		'es2021': true
+	env: {
+		browser: true,
+		commonjs: true,
+		es2021: true,
 	},
-	'extends': 'eslint:recommended',
-	'parserOptions': {
-		'ecmaVersion': 12
+	extends: ['airbnb-base', 'plugin:prettier/recommended'],
+	parserOptions: {
+		ecmaVersion: 12,
 	},
-	'rules': {
-		'indent': [
-			'error',
-			'tab'
-		],
-		'linebreak-style': [
-			'error',
-			'unix'
-		],
-		'quotes': [
-			'error',
-			'single'
-		],
-		'semi': [
-			'error',
-			'always'
-		]
-	}
+	rules: {
+		'consistent-return': 0,
+		'no-param-reassign': 0,
+		camelcase: 0,
+		'prefer-destructuring': 0,
+		'no-console': 0,
+		'prefer-promise-reject-errors': 0,
+		'no-async-promise-executor': 0,
+	},
 };
