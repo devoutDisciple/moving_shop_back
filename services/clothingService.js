@@ -1,6 +1,7 @@
 const resultMessage = require('../util/resultMessage');
 const sequelize = require('../dataSource/MysqlPoolClass');
 const clothing = require('../models/clothing');
+
 const ClothingModel = clothing(sequelize);
 const responseUtil = require('../util/responseUtil');
 
@@ -8,14 +9,14 @@ module.exports = {
 	// 根据商店获取衣物
 	getAllByShopid: async (req, res) => {
 		try {
-			let shopid = req.query.shopid;
-			let clothings = await ClothingModel.findAll({
+			const shopid = req.query.shopid;
+			const clothings = await ClothingModel.findAll({
 				where: {
-					shopid: shopid,
+					shopid,
 				},
 				order: [['sort', 'DESC']],
 			});
-			let result = responseUtil.renderFieldsAll(clothings, ['id', 'shopid', 'name', 'price', 'sort']);
+			const result = responseUtil.renderFieldsAll(clothings, ['id', 'shopid', 'name', 'price', 'sort']);
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);
@@ -25,7 +26,7 @@ module.exports = {
 
 	// 增加衣物
 	add: async (req, res) => {
-		let body = req.body;
+		const body = req.body;
 		try {
 			await ClothingModel.create(body);
 			res.send(resultMessage.success('success'));
@@ -37,10 +38,10 @@ module.exports = {
 
 	// 获取衣物详情
 	getDetailById: async (req, res) => {
-		let { id } = req.query;
+		const { id } = req.query;
 		try {
-			let detail = await ClothingModel.findOne({ where: { id: id } });
-			let result = responseUtil.renderFieldsObj(detail, ['id', 'shopid', 'name', 'price', 'sort']);
+			const detail = await ClothingModel.findOne({ where: { id } });
+			const result = responseUtil.renderFieldsObj(detail, ['id', 'shopid', 'name', 'price', 'sort']);
 			result.sortNum = String(result.sort);
 			res.send(resultMessage.success(result));
 		} catch (error) {
@@ -51,7 +52,7 @@ module.exports = {
 
 	// 更改衣物详情
 	updateClothing: async (req, res) => {
-		let { data } = req.body;
+		const { data } = req.body;
 		try {
 			await ClothingModel.update(
 				{

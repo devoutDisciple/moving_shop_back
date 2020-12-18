@@ -7,7 +7,7 @@ module.exports = {
 		return {
 			code: 200,
 			success: true,
-			data: data,
+			data,
 		};
 	},
 	error: (err) => {
@@ -33,7 +33,7 @@ module.exports = {
 	},
 	specilError: (code, data) => {
 		return {
-			code: code,
+			code,
 			success: false,
 			message: data,
 		};

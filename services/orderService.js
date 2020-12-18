@@ -1,23 +1,27 @@
+const moment = require('moment');
 const resultMessage = require('../util/resultMessage');
 const sequelize = require('../dataSource/MysqlPoolClass');
 const MoneyUtil = require('../util/MoneyUtil');
 
 const order = require('../models/order');
+
 const orderModel = order(sequelize);
 
 const cabinet = require('../models/cabinet');
+
 const cabinetModel = cabinet(sequelize);
 orderModel.belongsTo(cabinetModel, { foreignKey: 'cabinetId', targetKey: 'id', as: 'cabinetDetail' });
 
 const shop = require('../models/shop');
+
 const shopModel = shop(sequelize);
 orderModel.belongsTo(shopModel, { foreignKey: 'shopid', targetKey: 'id', as: 'shopDetail' });
 
 const user = require('../models/user');
+
 const userModel = user(sequelize);
 orderModel.belongsTo(userModel, { foreignKey: 'userid', targetKey: 'id', as: 'userDetail' });
 
-const moment = require('moment');
 const CountUtil = require('../util/CountUtil');
 const ObjectUtil = require('../util/ObjectUtil');
 const cabinetUtil = require('../util/cabinetUtil');
@@ -31,11 +35,11 @@ module.exports = {
 	// 获取订单统计销量和总金额
 	getAllSalesNum: async (req, res) => {
 		try {
-			let shopid = req.query.shopid;
-			let orderTotalNum = await orderModel.count({ where: { shopid: shopid } });
-			let orderMoneyTotalMoney = await orderModel.sum('money', { where: { shopid: shopid, status: 5 } });
-			let orderSendMoneyTotalMoney = await orderModel.sum('send_money', { where: { shopid: shopid, status: 5 } });
-			let totalMoney = (Number(orderMoneyTotalMoney) + Number(orderSendMoneyTotalMoney)).toFixed(2);
+			const shopid = req.query.shopid;
+			const orderTotalNum = await orderModel.count({ where: { shopid } });
+			const orderMoneyTotalMoney = await orderModel.sum('money', { where: { shopid, status: 5 } });
+			const orderSendMoneyTotalMoney = await orderModel.sum('send_money', { where: { shopid, status: 5 } });
+			const totalMoney = (Number(orderMoneyTotalMoney) + Number(orderSendMoneyTotalMoney)).toFixed(2);
 			console.log(orderMoneyTotalMoney, orderSendMoneyTotalMoney);
 			res.send(resultMessage.success({ orderTotalNum, totalMoney }));
 		} catch (error) {
@@ -48,23 +52,23 @@ module.exports = {
 	// 1-存储在柜子 2-店员取货，清洗中 3-待付款 4-待取货 5-已完成 6-预约上门等待店员取货 7-积分兑换
 	getAllOrderNumByType: async (req, res) => {
 		try {
-			let shopid = req.query.shopid;
+			const shopid = req.query.shopid;
 			// 店铺待收取订单
-			let orderType1 = await orderModel.count({ where: { shopid: shopid, status: 1 } });
+			const orderType1 = await orderModel.count({ where: { shopid, status: 1 } });
 			// 清洗中订单
-			let orderType2 = await orderModel.count({ where: { shopid: shopid, status: 2 } });
+			const orderType2 = await orderModel.count({ where: { shopid, status: 2 } });
 			// 待付款订单
-			let orderType3 = await orderModel.count({ where: { shopid: shopid, status: [3, 4] } });
+			const orderType3 = await orderModel.count({ where: { shopid, status: [3, 4] } });
 			// 用户未收取订单
-			let orderType4 = await orderModel.count({ where: { shopid: shopid, status: [3, 4] } });
+			const orderType4 = await orderModel.count({ where: { shopid, status: [3, 4] } });
 			// 已完成订单
-			let orderType5 = await orderModel.count({ where: { shopid: shopid, status: 5 } });
+			const orderType5 = await orderModel.count({ where: { shopid, status: 5 } });
 			// 上门取衣订单
-			let orderType6 = await orderModel.count({ where: { shopid: shopid, status: [6, 8] } });
+			const orderType6 = await orderModel.count({ where: { shopid, status: [6, 8] } });
 			// 积分兑换订单
-			let orderType7 = await orderModel.count({ where: { shopid: shopid, status: 7 } });
+			const orderType7 = await orderModel.count({ where: { shopid, status: 7 } });
 			// 待派送订单
-			let orderType9 = await orderModel.count({ where: { shopid: shopid, status: 9 } });
+			const orderType9 = await orderModel.count({ where: { shopid, status: 9 } });
 			res.send(resultMessage.success({ orderType1, orderType2, orderType3, orderType4, orderType5, orderType6, orderType7, orderType9 }));
 		} catch (error) {
 			console.log(error);
@@ -75,8 +79,8 @@ module.exports = {
 	// 更改订单状态
 	updateOrderStatus: async (req, res) => {
 		try {
-			let { orderid, status } = req.body;
-			await orderModel.update({ status: status }, { where: { id: orderid } });
+			const { orderid, status } = req.body;
+			await orderModel.update({ status }, { where: { id: orderid } });
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);
@@ -87,15 +91,16 @@ module.exports = {
 	// 分页获取订单 通过shopid
 	getOrderByShopidAndPage: async (req, res) => {
 		try {
-			let { current = 1, pagesize = 10, shopid, status } = req.query;
-			if (status == 6) status = [6, 8];
-			if (status == 3) status = [3, 4];
-			if (status == 4) status = [3, 4];
-			let offset = CountUtil.getInt((current - 1) * pagesize);
-			let orders = await orderModel.findAll({
+			const { current = 1, pagesize = 10, shopid } = req.query;
+			let { status } = req.query;
+			if (Number(status) === 6) status = [6, 8];
+			if (Number(status) === 3) status = [3, 4];
+			if (Number(status) === 4) status = [3, 4];
+			const offset = CountUtil.getInt((current - 1) * pagesize);
+			const orders = await orderModel.findAll({
 				where: {
-					shopid: shopid,
-					status: status,
+					shopid,
+					status,
 				},
 				include: [
 					{
@@ -111,7 +116,7 @@ module.exports = {
 				limit: Number(pagesize),
 				offset: Number(offset),
 			});
-			let result = responseUtil.renderFieldsAll(orders, [
+			const result = responseUtil.renderFieldsAll(orders, [
 				'id',
 				'code',
 				'userid',
@@ -132,27 +137,27 @@ module.exports = {
 			]);
 			result.forEach((item, index) => {
 				item.create_time = moment(item.create_time).format('YYYY-MM-DD HH:mm:ss');
-				item.modify_time ? (item.modify_time = moment(item.modify_time).format('YYYY-MM-DD HH:mm:ss')) : null;
-				item.shopName = orders[index]['shopDetail'] ? orders[index]['shopDetail']['name'] || '' : '';
-				item.cabinetId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['id'] || '' : '';
-				item.cabinetUrl = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['url'] || '' : '';
-				item.cabinetName = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['name'] || '' : '';
-				item.cabinetAdderss = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['address'] || '' : '';
-				item.cabinetBoxId = orders[index]['cabinetDetail'] ? orders[index]['cabinetDetail']['boxid'] || '' : '';
+				if (item.modify_time) item.modify_time = moment(item.modify_time).format('YYYY-MM-DD HH:mm:ss');
+				item.shopName = orders[index].shopDetail ? orders[index].shopDetail.name || '' : '';
+				item.cabinetId = orders[index].cabinetDetail ? orders[index].cabinetDetail.id || '' : '';
+				item.cabinetUrl = orders[index].cabinetDetail ? orders[index].cabinetDetail.url || '' : '';
+				item.cabinetName = orders[index].cabinetDetail ? orders[index].cabinetDetail.name || '' : '';
+				item.cabinetAdderss = orders[index].cabinetDetail ? orders[index].cabinetDetail.address || '' : '';
+				item.cabinetBoxId = orders[index].cabinetDetail ? orders[index].cabinetDetail.boxid || '' : '';
 				MoneyUtil.countMoney(item);
-				//上门取衣
+				// 上门取衣
 				if (item.order_type === 2 || item.order_type === 4) {
-					item.home_address = orders[index] ? orders[index]['home_address'] || '' : '';
-					item.home_username = orders[index] ? orders[index]['home_username'] || '' : '';
-					item.home_phone = orders[index] ? orders[index]['home_phone'] || '' : '';
-					item.home_time = orders[index] ? moment(orders[index]['home_time']).format('YYYY-MM-DD HH:mm:ss') || '' : '';
+					item.home_address = orders[index] ? orders[index].home_address || '' : '';
+					item.home_username = orders[index] ? orders[index].home_username || '' : '';
+					item.home_phone = orders[index] ? orders[index].home_phone || '' : '';
+					item.home_time = orders[index] ? moment(orders[index].home_time).format('YYYY-MM-DD HH:mm:ss') || '' : '';
 				}
 				// 积分兑换
 				if (item.order_type === 3) {
-					item.intergral_address = orders[index] ? orders[index]['intergral_address'] || '' : '';
-					item.intergral_phone = orders[index] ? orders[index]['intergral_phone'] || '' : '';
-					item.intergral_username = orders[index] ? orders[index]['intergral_username'] || '' : '';
-					item.intergral_num = orders[index] ? orders[index]['intergral_num'] || '' : '';
+					item.intergral_address = orders[index] ? orders[index].intergral_address || '' : '';
+					item.intergral_phone = orders[index] ? orders[index].intergral_phone || '' : '';
+					item.intergral_username = orders[index] ? orders[index].intergral_username || '' : '';
+					item.intergral_num = orders[index] ? orders[index].intergral_num || '' : '';
 				}
 			});
 			res.send(resultMessage.success(result));
@@ -165,7 +170,7 @@ module.exports = {
 	// 获取某个订单详情
 	getOrderById: async (req, res) => {
 		try {
-			let order = await orderModel.findOne({
+			const orderDetail = await orderModel.findOne({
 				where: {
 					id: req.query.id,
 				},
@@ -180,7 +185,7 @@ module.exports = {
 					},
 				],
 			});
-			let result = responseUtil.renderFieldsObj(order, [
+			const result = responseUtil.renderFieldsObj(orderDetail, [
 				'id',
 				'code',
 				'boxid',
@@ -205,32 +210,32 @@ module.exports = {
 			result.create_time = moment(result.create_time).format('YYYY-MM-DD HH:mm:ss');
 			result.modify_time = result.modify_time ? moment(result.modify_time).format('YYYY-MM-DD HH:mm:ss') : '';
 			result.weekDay = moment(result.create_time).day();
-			result.cabinetAddress = order.cabinetDetail ? order.cabinetDetail.address : '';
-			result.cabinetName = order.cabinetDetail ? order.cabinetDetail.name : '';
-			result.cabinetUrl = order.cabinetDetail ? order.cabinetDetail.url : '';
+			result.cabinetAddress = orderDetail.cabinetDetail ? orderDetail.cabinetDetail.address : '';
+			result.cabinetName = orderDetail.cabinetDetail ? orderDetail.cabinetDetail.name : '';
+			result.cabinetUrl = orderDetail.cabinetDetail ? orderDetail.cabinetDetail.url : '';
 			MoneyUtil.countMoney(result);
-			//上门取衣
+			// 上门取衣
 			if (result.order_type === 2 || result.order_type === 4) {
-				result.home_address = order ? order['home_address'] || '' : '';
-				result.home_username = order ? order['home_username'] || '' : '';
-				result.home_phone = order ? order['home_phone'] || '' : '';
-				result.home_time = order ? moment(order['home_time']).format('YYYY-MM-DD HH:mm:ss') || '' : '';
+				result.home_address = orderDetail ? orderDetail.home_address || '' : '';
+				result.home_username = orderDetail ? orderDetail.home_username || '' : '';
+				result.home_phone = orderDetail ? orderDetail.home_phone || '' : '';
+				result.home_time = orderDetail ? moment(orderDetail.home_time).format('YYYY-MM-DD HH:mm:ss') || '' : '';
 			}
 			// 积分兑换
 			if (result.order_type === 3) {
-				result.intergral_address = order ? order['intergral_address'] || '' : '';
-				result.intergral_phone = order ? order['intergral_phone'] || '' : '';
-				result.intergral_username = order ? order['intergral_username'] || '' : '';
-				result.intergral_num = order ? order['intergral_num'] || '' : '';
+				result.intergral_address = orderDetail ? orderDetail.intergral_address || '' : '';
+				result.intergral_phone = orderDetail ? orderDetail.intergral_phone || '' : '';
+				result.intergral_username = orderDetail ? orderDetail.intergral_username || '' : '';
+				result.intergral_num = orderDetail ? orderDetail.intergral_num || '' : '';
 			}
 			result.userDetail = {};
-			result.userDetail.id = order && order['userDetail'] ? order.userDetail.id : '';
-			result.userDetail.username = order && order['userDetail'] ? order.userDetail.username : '';
-			result.userDetail.phone = order && order['userDetail'] ? order.userDetail.phone : '';
-			result.userDetail.addresss = order && order['userDetail'] ? order.userDetail.addresss : '';
-			result.userDetail.age = order && order['userDetail'] ? order.userDetail.age : '';
-			result.userDetail.member = order && order['userDetail'] ? order.userDetail.member : '';
-			result.userDetail.sex = order && order['userDetail'] ? order.userDetail.member : '';
+			result.userDetail.id = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.id : '';
+			result.userDetail.username = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.username : '';
+			result.userDetail.phone = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.phone : '';
+			result.userDetail.addresss = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.addresss : '';
+			result.userDetail.age = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.age : '';
+			result.userDetail.member = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.member : '';
+			result.userDetail.sex = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.member : '';
 			res.send(resultMessage.success(result));
 		} catch (error) {
 			console.log(error);
@@ -241,20 +246,20 @@ module.exports = {
 	// 打开柜子, 取出衣物
 	openCellById: async (req, res) => {
 		try {
-			let { orderId, status, optid } = req.body;
-			let order = await orderModel.findOne({
+			const { orderId, status, optid } = req.body;
+			const orderDetail = await orderModel.findOne({
 				where: { id: orderId },
 			});
-			let { cellid, boxid, cabinetId } = order;
+			const { cellid, boxid, cabinetId } = orderDetail;
 			// 获取token
 			let boxLoginDetail = await cabinetUtil.getToken();
 			boxLoginDetail = JSON.parse(boxLoginDetail);
-			let token = boxLoginDetail.data || '';
+			const token = boxLoginDetail.data || '';
 			if (!token) return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 			// 打开柜子
-			let result = await cabinetUtil.openCellGet(cabinetId, boxid, cellid, token, optid);
+			const result = await cabinetUtil.openCellGet(cabinetId, boxid, cellid, token, optid);
 			// 打开后可用的格子的数量
-			let used = result.used;
+			const used = result.used;
 			// 更新可用格子状态
 			await cabinetModel.update(
 				{ used: JSON.stringify(used) },
@@ -265,7 +270,7 @@ module.exports = {
 				},
 			);
 			// 更新订单状态
-			await orderModel.update({ status: status }, { where: { id: orderId } });
+			await orderModel.update({ status }, { where: { id: orderId } });
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);
@@ -276,14 +281,14 @@ module.exports = {
 	// 店员存放衣物 随机打开柜子
 	openCellByRandomByCabinetId: async (req, res) => {
 		try {
-			let { cabinetId, orderId, type, status, userid } = req.body;
+			const { cabinetId, orderId, type, status, userid } = req.body;
 			// 获取token
 			let boxLoginDetail = await cabinetUtil.getToken();
 			boxLoginDetail = JSON.parse(boxLoginDetail);
-			let token = boxLoginDetail.data || '';
+			const token = boxLoginDetail.data || '';
 			if (!token) return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 			// 打开柜子
-			let result = await cabinetUtil.openCellSave(cabinetId, token, type, userid);
+			const result = await cabinetUtil.openCellSave(cabinetId, token, type, userid);
 			if (!result) {
 				return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 			}
@@ -291,7 +296,7 @@ module.exports = {
 				return res.send(resultMessage.error(result.message));
 			}
 			// 打开后可用的格子的数量
-			let used = result.used;
+			const used = result.used;
 			console.log(used);
 			// 更新可用格子状态
 			await cabinetModel.update(
@@ -305,9 +310,9 @@ module.exports = {
 			// 更新订单状态
 			await orderModel.update(
 				{
-					status: status,
+					status,
 					boxid: result.boxid,
-					cabinetId: cabinetId,
+					cabinetId,
 					cellid: result.data,
 					modify_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 				},
@@ -318,8 +323,8 @@ module.exports = {
 			if (config.send_message_flag === 2) return;
 
 			// 查询订单详情 , 发送信息
-			let cabinetDetail = await cabinetModel.findOne({ where: { id: cabinetId } });
-			let orderDetail = await orderModel.findOne({
+			const cabinetDetail = await cabinetModel.findOne({ where: { id: cabinetId } });
+			const orderDetail = await orderModel.findOne({
 				where: { id: orderId },
 				include: [
 					{
@@ -329,9 +334,9 @@ module.exports = {
 				],
 			});
 			let phone = '';
-			if (orderDetail.order_type == 1) phone = orderDetail.userDetail.phone;
-			if (orderDetail.order_type == 2) phone = orderDetail.home_phone;
-			if (orderDetail.order_type == 3) phone = orderDetail.intergral_phone;
+			if (Number(orderDetail.order_type) === 1) phone = orderDetail.userDetail.phone;
+			if (Number(orderDetail.order_type) === 2) phone = orderDetail.home_phone;
+			if (Number(orderDetail.order_type) === 3) phone = orderDetail.intergral_phone;
 			if (!phone) return;
 			PostMessage.sendMessageSaveClothingToUser(phone, orderDetail.code, cabinetDetail.address);
 		} catch (error) {
@@ -345,7 +350,7 @@ module.exports = {
 		try {
 			// originMoney: originPrice,
 			// discount: discount,
-			let { orderId, goods, totalPrice, originMoney, discount } = req.body;
+			const { orderId, goods, totalPrice, originMoney, discount } = req.body;
 			// 更新订单状态
 			await orderModel.update(
 				{
@@ -362,7 +367,7 @@ module.exports = {
 			if (config.send_message_flag === 2) return;
 
 			// message_sureOrderMoneyToUser
-			let order = await orderModel.findOne({
+			const orderDetail = await orderModel.findOne({
 				where: { id: orderId },
 				include: [
 					{
@@ -372,11 +377,11 @@ module.exports = {
 				],
 			});
 			let phone = '';
-			if (order.order_type == 1) phone = order.userDetail.phone;
-			if (order.order_type == 2) phone = order.home_phone;
-			if (order.order_type == 3) phone = order.intergral_phone;
+			if (Number(orderDetail.order_type) === 1) phone = orderDetail.userDetail.phone;
+			if (Number(orderDetail.order_type) === 2) phone = orderDetail.home_phone;
+			if (Number(orderDetail.order_type) === 3) phone = orderDetail.intergral_phone;
 			if (!phone) return;
-			PostMessage.sendMessageSureMoneyToUser(phone, order.code);
+			PostMessage.sendMessageSureMoneyToUser(phone, orderDetail.code);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -386,7 +391,7 @@ module.exports = {
 	// 完成派送
 	successClear: async (req, res) => {
 		try {
-			let { orderid } = req.body;
+			const { orderid } = req.body;
 			await orderModel.update({ send_home: 2, status: 3 }, { where: { id: orderid } });
 			res.send(resultMessage.success('success'));
 		} catch (error) {
@@ -398,8 +403,8 @@ module.exports = {
 	// 店员录入订单
 	addOrderByShoper: async (req, res) => {
 		try {
-			let { home_username, home_phone, home_address, desc, shopid, userid, urgency } = req.body;
-			let code = ObjectUtil.createOrderCode();
+			const { home_username, home_phone, home_address, desc, shopid, userid, urgency } = req.body;
+			const code = ObjectUtil.createOrderCode();
 			// 更新订单状态
 			await orderModel.create({
 				code,
@@ -413,7 +418,7 @@ module.exports = {
 				send_people: userid, // 是谁录入的
 				is_sure: 2,
 				status: 2,
-				urgency: urgency,
+				urgency,
 				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 			});
 			res.send(resultMessage.success('success'));

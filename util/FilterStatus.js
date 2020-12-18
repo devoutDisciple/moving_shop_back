@@ -1,6 +1,6 @@
 module.exports = {
 	// 会员等级
-	filterMemberStatus: function (status) {
+	filterMemberStatus(status) {
 		let data = '';
 		switch (Number(status)) {
 			case 1:

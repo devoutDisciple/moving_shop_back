@@ -5,22 +5,23 @@ const sequelize = require('../dataSource/MysqlPoolClass');
 const AppConfig = require('../config/AppConfig');
 const shop = require('../models/shop');
 const ObjectUtil = require('../util/ObjectUtil');
+
 const ShopModel = shop(sequelize);
-let filePath = AppConfig.shopImgFilePath;
-let shopImgUrl = AppConfig.shopImgUrl;
+const filePath = AppConfig.shopImgFilePath;
+const shopImgUrl = AppConfig.shopImgUrl;
 
 module.exports = {
 	// 获取店铺信息
 	getShopDetailById: async (req, res) => {
 		try {
-			let shopid = req.query.shopid;
-			let shop = await ShopModel.findOne({
+			const shopid = req.query.shopid;
+			const shopDetail = await ShopModel.findOne({
 				where: {
 					id: shopid,
 				},
 				order: [['sort', 'DESC']],
 			});
-			let result = responseUtil.renderFieldsObj(shop, [
+			const result = responseUtil.renderFieldsObj(shopDetail, [
 				'id',
 				'name',
 				'manager',
@@ -43,8 +44,8 @@ module.exports = {
 
 	updateShopDetail: async (req, res) => {
 		try {
-			let { key, value, shopid } = req.body,
-				params = {};
+			const { key, value, shopid } = req.body;
+			const params = {};
 			params[key] = value;
 			await ShopModel.update(params, {
 				where: {
@@ -60,10 +61,11 @@ module.exports = {
 
 	addPhoto: async (req, res) => {
 		try {
-			let { img, shopid } = req.body;
-			var base64Data = img.replace(/^data:image\/\w+;base64,/, '');
-			var dataBuffer = new Buffer(base64Data, 'base64');
-			let filename = 'shop_' + ObjectUtil.getName() + '_' + Date.now() + '.jpg';
+			const { img, shopid } = req.body;
+			const base64Data = img.replace(/^data:image\/\w+;base64,/, '');
+			// eslint-disable-next-line no-buffer-constructor
+			const dataBuffer = new Buffer(base64Data, 'base64');
+			const filename = `shop_${ObjectUtil.getName()}_${Date.now()}.jpg`;
 			await fs.writeFileSync(`${filePath}/${filename}`, dataBuffer);
 			await ShopModel.update(
 				{ url: `${shopImgUrl + filename}` },
