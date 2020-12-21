@@ -37,10 +37,15 @@ module.exports = {
 		try {
 			const shopid = req.query.shopid;
 			const orderTotalNum = await orderModel.count({ where: { shopid } });
-			const orderMoneyTotalMoney = await orderModel.sum('money', { where: { shopid, status: 5 } });
+			// const orderMoneyTotalMoney = await orderModel.sum('money', { where: { shopid, status: 5 } });
+			const ordersList = await orderModel.findAll({ where: { shopid, status: 5 } });
+			let orderMoneyTotalMoney = 0;
+			ordersList.forEach((item) => {
+				MoneyUtil.countMoney(item);
+				orderMoneyTotalMoney += Number(item.payMoney);
+			});
 			const orderSendMoneyTotalMoney = await orderModel.sum('send_money', { where: { shopid, status: 5 } });
 			const totalMoney = (Number(orderMoneyTotalMoney) + Number(orderSendMoneyTotalMoney)).toFixed(2);
-			console.log(orderMoneyTotalMoney, orderSendMoneyTotalMoney);
 			res.send(resultMessage.success({ orderTotalNum, totalMoney }));
 		} catch (error) {
 			console.log(error);
@@ -338,6 +343,7 @@ module.exports = {
 			if (Number(orderDetail.order_type) === 2) phone = orderDetail.home_phone;
 			if (Number(orderDetail.order_type) === 3) phone = orderDetail.intergral_phone;
 			if (!phone) return;
+			// 发送存衣服通知给用户
 			PostMessage.sendMessageSaveClothingToUser(phone, orderDetail.code, cabinetDetail.address);
 		} catch (error) {
 			console.log(error);
@@ -381,6 +387,7 @@ module.exports = {
 			if (Number(orderDetail.order_type) === 2) phone = orderDetail.home_phone;
 			if (Number(orderDetail.order_type) === 3) phone = orderDetail.intergral_phone;
 			if (!phone) return;
+			// 发送订单金额已确定通知给用户
 			PostMessage.sendMessageSureMoneyToUser(phone, orderDetail.code);
 		} catch (error) {
 			console.log(error);

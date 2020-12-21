@@ -2,7 +2,7 @@
 
 const Sequelize = require('sequelize');
 
-module.exports = (sequelize) => {
+module.exports = sequelize => {
 	return sequelize.define(
 		'clothing',
 		{
@@ -13,6 +13,10 @@ module.exports = (sequelize) => {
 				autoIncrement: true,
 			},
 			shopid: {
+				type: Sequelize.INTEGER(11),
+				allowNull: false,
+			},
+			typeid: {
 				type: Sequelize.INTEGER(11),
 				allowNull: false,
 			},

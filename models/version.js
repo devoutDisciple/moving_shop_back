@@ -1,8 +1,7 @@
 /* jshint indent: 2 */
 
 const Sequelize = require('sequelize');
-
-module.exports = (sequelize) => {
+module.exports = function (sequelize) {
 	return sequelize.define(
 		'version',
 		{

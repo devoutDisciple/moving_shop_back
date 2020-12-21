@@ -1,9 +1,10 @@
 /* jshint indent: 2 */
 
 const Sequelize = require('sequelize');
-module.exports = function (sequelize) {
+
+module.exports = sequelize => {
 	return sequelize.define(
-		'register',
+		'clothing',
 		{
 			id: {
 				type: Sequelize.INTEGER(11),
@@ -11,30 +12,25 @@ module.exports = function (sequelize) {
 				primaryKey: true,
 				autoIncrement: true,
 			},
-			phone: {
-				type: Sequelize.STRING(11),
+			name: {
+				type: Sequelize.STRING(255),
 				allowNull: false,
-				primaryKey: true,
 			},
-			security_code: {
-				type: Sequelize.INTEGER(11),
-				allowNull: true,
-			},
-			password: {
+			url: {
 				type: Sequelize.STRING(255),
 				allowNull: true,
 			},
+			sort: {
+				type: Sequelize.INTEGER(11),
+				allowNull: false,
+			},
 			create_time: {
 				type: Sequelize.DATE,
-				allowNull: true,
-			},
-			expire_time: {
-				type: Sequelize.DATE,
-				allowNull: true,
+				allowNull: false,
 			},
 		},
 		{
-			tableName: 'register',
+			tableName: 'clothing_type',
 			timestamps: false,
 		},
 	);

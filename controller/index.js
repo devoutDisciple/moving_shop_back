@@ -8,6 +8,7 @@ const versionController = require('./versionController');
 const mockController = require('./mockController');
 const addressController = require('./addressController');
 const printerController = require('./printController');
+const clothingTypeController = require('./clothingTypeController');
 
 const router = (app) => {
 	// 账户相关
@@ -30,5 +31,7 @@ const router = (app) => {
 	app.use('/address', addressController);
 	// mock相关
 	app.use('/mock', mockController);
+	// 衣物分类
+	app.use('/clothing_type', clothingTypeController);
 };
 module.exports = router;
