@@ -48,9 +48,19 @@ router.post('/addOrderByShoper', (req, res) => {
 	orderService.addOrderByShoper(req, res);
 });
 
-// 完成清洗
-router.post('/successClear', (req, res) => {
-	orderService.successClear(req, res);
+// 完成派送 上门取衣
+router.post('/successSendByHomeOrder', (req, res) => {
+	orderService.successSendByHomeOrder(req, res);
+});
+
+// 完成清洗 店内下单 店员录入 complateClear
+router.post('/complateClear', (req, res) => {
+	orderService.complateClear(req, res);
+});
+
+// 用户取到衣物
+router.post('/successOrder', (req, res) => {
+	orderService.successOrder(req, res);
 });
 
 module.exports = router;

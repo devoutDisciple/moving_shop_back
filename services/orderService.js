@@ -26,6 +26,7 @@ const CountUtil = require('../util/CountUtil');
 const ObjectUtil = require('../util/ObjectUtil');
 const cabinetUtil = require('../util/cabinetUtil');
 const responseUtil = require('../util/responseUtil');
+const orderUtil = require('../util/OrderUtil');
 
 const PostMessage = require('../util/PostMessage');
 
@@ -329,22 +330,10 @@ module.exports = {
 
 			// 查询订单详情 , 发送信息
 			const cabinetDetail = await cabinetModel.findOne({ where: { id: cabinetId } });
-			const orderDetail = await orderModel.findOne({
-				where: { id: orderId },
-				include: [
-					{
-						model: userModel,
-						as: 'userDetail',
-					},
-				],
-			});
-			let phone = '';
-			if (Number(orderDetail.order_type) === 1) phone = orderDetail.userDetail.phone;
-			if (Number(orderDetail.order_type) === 2) phone = orderDetail.home_phone;
-			if (Number(orderDetail.order_type) === 3) phone = orderDetail.intergral_phone;
-			if (!phone) return;
+			const orderDetail = await orderUtil.getOrderPhoneToUser(orderId);
+			if (!orderDetail.phone) return;
 			// 发送存衣服通知给用户
-			PostMessage.sendMessageSaveClothingToUser(phone, orderDetail.code, cabinetDetail.address);
+			PostMessage.sendMessageSaveClothingToUser(orderDetail.phone, orderDetail.code, cabinetDetail.address);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -373,22 +362,10 @@ module.exports = {
 			if (config.send_message_flag === 2) return;
 
 			// message_sureOrderMoneyToUser
-			const orderDetail = await orderModel.findOne({
-				where: { id: orderId },
-				include: [
-					{
-						model: userModel,
-						as: 'userDetail',
-					},
-				],
-			});
-			let phone = '';
-			if (Number(orderDetail.order_type) === 1) phone = orderDetail.userDetail.phone;
-			if (Number(orderDetail.order_type) === 2) phone = orderDetail.home_phone;
-			if (Number(orderDetail.order_type) === 3) phone = orderDetail.intergral_phone;
-			if (!phone) return;
+			const orderDetail = await orderUtil.getOrderPhoneToUser(orderId);
+			if (!orderDetail.phone) return;
 			// 发送订单金额已确定通知给用户
-			PostMessage.sendMessageSureMoneyToUser(phone, orderDetail.code);
+			PostMessage.sendMessageSureMoneyToUser(orderDetail.phone, orderDetail.code);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -396,7 +373,7 @@ module.exports = {
 	},
 
 	// 完成派送
-	successClear: async (req, res) => {
+	successSendByHomeOrder: async (req, res) => {
 		try {
 			const { orderid } = req.body;
 			await orderModel.update({ send_home: 2, status: 3 }, { where: { id: orderid } });
@@ -429,6 +406,40 @@ module.exports = {
 				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 			});
 			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
+
+	// 完成清洗 店员录入 店内下单
+	complateClear: async (req, res) => {
+		try {
+			const { orderid } = req.body;
+			await orderModel.update({ status: 4 }, { where: { id: orderid } });
+			res.send(resultMessage.success('success'));
+
+			if (config.send_message_flag === 2) return;
+
+			const orderDetail = await orderUtil.getOrderPhoneToUser(orderid);
+			if (!orderDetail.phone) return;
+			PostMessage.sendMessageSuccessClearToUser(orderDetail.phone);
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
+
+	// 用户取到订单 店员录入 店内下单
+	successOrder: async (req, res) => {
+		try {
+			const { orderid } = req.body;
+			await orderModel.update({ status: 5 }, { where: { id: orderid } });
+			res.send(resultMessage.success('success'));
+			if (config.send_message_flag === 2) return;
+			const orderDetail = await orderUtil.getOrderPhoneToUser(orderid);
+			if (!orderDetail.phone) return;
+			PostMessage.sendMessageSuccessOrderToUser(orderDetail.phone);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
