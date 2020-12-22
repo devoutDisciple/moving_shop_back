@@ -13,7 +13,7 @@ router.get('/getAllOrderNumByType', (req, res) => {
 	orderService.getAllOrderNumByType(req, res);
 });
 
-// 通过商店id获取分页数据 getOrderByShopidAndPage
+// 通过商店id获取分页数据
 router.get('/getOrderByShopidAndPage', (req, res) => {
 	orderService.getOrderByShopidAndPage(req, res);
 });
@@ -61,6 +61,11 @@ router.post('/complateClear', (req, res) => {
 // 用户取到衣物
 router.post('/successOrder', (req, res) => {
 	orderService.successOrder(req, res);
+});
+
+// 用户取到衣物
+router.post('/deleteOrder', (req, res) => {
+	orderService.deleteOrder(req, res);
 });
 
 module.exports = router;

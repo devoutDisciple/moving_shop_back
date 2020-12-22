@@ -445,4 +445,16 @@ module.exports = {
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
 		}
 	},
+
+	// 删除订单
+	deleteOrder: async (req, res) => {
+		try {
+			const { orderid } = req.body;
+			await orderModel.destroy({ where: { id: orderid } });
+			res.send(resultMessage.success('success'));
+		} catch (error) {
+			console.log(error);
+			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
+		}
+	},
 };
