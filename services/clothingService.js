@@ -39,7 +39,7 @@ module.exports = {
 		const { id } = req.query;
 		try {
 			const detail = await ClothingModel.findOne({ where: { id } });
-			const result = responseUtil.renderFieldsObj(detail, ['id', 'shopid', 'name', 'price', 'sort']);
+			const result = responseUtil.renderFieldsObj(detail, ['id', 'shopid', 'typeid', 'name', 'price', 'sort']);
 			result.sort = String(result.sort);
 			res.send(resultMessage.success(result));
 		} catch (error) {
@@ -55,6 +55,7 @@ module.exports = {
 			await ClothingModel.update(
 				{
 					name: data.name,
+					typeid: data.typeid,
 					price: data.price,
 					sort: data.sort,
 				},
