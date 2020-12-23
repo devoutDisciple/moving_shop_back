@@ -4,38 +4,28 @@ module.exports = {
 	// 400 指定错误
 	// 401 没有登录 或者 登录超时
 	success: (data) => {
-		return {
-			code: 200,
-			success: true,
-			data,
-		};
+		const resData = { code: 200, success: true, data };
+		console.info('请求成功');
+		return resData;
 	},
 	error: (err) => {
-		return {
-			code: 500,
-			success: false,
-			message: err.message || err,
-		};
+		const resData = { code: 500, success: false, message: err.message || err };
+		console.info(`请求错误：data: ${JSON.stringify(resData)}`);
+		return resData;
 	},
 	errorMsg: (data) => {
-		return {
-			code: 400,
-			success: false,
-			message: data,
-		};
+		const resData = { code: 400, success: false, message: data };
+		console.info(`请求错误：data: ${JSON.stringify(resData)}`);
+		return resData;
 	},
 	loginError: (data) => {
-		return {
-			code: 401,
-			success: false,
-			message: data || '请重新登录!',
-		};
+		const resData = { code: 401, success: false, message: data || '请重新登录!' };
+		console.info(`重新登录：data: ${JSON.stringify(resData)}`);
+		return resData;
 	},
 	specilError: (code, data) => {
-		return {
-			code,
-			success: false,
-			message: data,
-		};
+		const resData = { code, success: false, message: data };
+		console.info(`重新登录：data: ${JSON.stringify(resData)}`);
+		return resData;
 	},
 };

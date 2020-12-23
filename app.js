@@ -1,7 +1,6 @@
 const express = require('express');
 
 const app = express();
-const logger = require('morgan');
 const chalk = require('chalk');
 const cookieParser = require('cookie-parser');
 const sessionParser = require('express-session');
@@ -9,6 +8,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const controller = require('./controller/index');
 const config = require('./config/Env');
+const ChangeLog = require('./middleware/ChangeLog');
+const LogMiddleware = require('./middleware/LogMiddleware');
 
 // 解析cookie和session还有body
 app.use(cookieParser()); // 挂载中间件，可以理解为实例化
@@ -39,8 +40,17 @@ app.use(bodyParser.json());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// 打印日志
-app.use(logger(':date[iso] :remote-addr :remote-user :user-agent :method :url :status - :response-time ms'));
+// 改变默认的log
+ChangeLog.changeLog();
+
+// 改变默认的info
+ChangeLog.changeInfo();
+
+// 改变默认的error
+ChangeLog.changeError();
+
+// 自定义日志
+app.use(LogMiddleware);
 
 app.all('*', (req, res, next) => {
 	res.header('Access-Control-Allow-Origin', '*');
