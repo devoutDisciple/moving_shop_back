@@ -37,15 +37,15 @@ module.exports = {
 	getAllSalesNum: async (req, res) => {
 		try {
 			const shopid = req.query.shopid;
-			const orderTotalNum = await orderModel.count({ where: { shopid } });
+			const orderTotalNum = await orderModel.count({ where: { shopid, is_delete: 1 } });
 			// const orderMoneyTotalMoney = await orderModel.sum('money', { where: { shopid, status: 5 } });
-			const ordersList = await orderModel.findAll({ where: { shopid, status: 5 } });
+			const ordersList = await orderModel.findAll({ where: { shopid, status: 5, is_delete: 1 } });
 			let orderMoneyTotalMoney = 0;
 			ordersList.forEach((item) => {
 				MoneyUtil.countMoney(item);
 				orderMoneyTotalMoney += Number(item.payMoney);
 			});
-			const orderSendMoneyTotalMoney = await orderModel.sum('send_money', { where: { shopid, status: 5 } });
+			const orderSendMoneyTotalMoney = await orderModel.sum('send_money', { where: { shopid, status: 5, is_delete: 1 } });
 			const totalMoney = (Number(orderMoneyTotalMoney) + Number(orderSendMoneyTotalMoney)).toFixed(2);
 			res.send(resultMessage.success({ orderTotalNum, totalMoney }));
 		} catch (error) {
@@ -60,21 +60,21 @@ module.exports = {
 		try {
 			const shopid = req.query.shopid;
 			// 店铺待收取订单
-			const orderType1 = await orderModel.count({ where: { shopid, status: 1 } });
+			const orderType1 = await orderModel.count({ where: { shopid, status: 1, is_delete: 1 } });
 			// 清洗中订单
-			const orderType2 = await orderModel.count({ where: { shopid, status: 2 } });
+			const orderType2 = await orderModel.count({ where: { shopid, status: 2, is_delete: 1 } });
 			// 待付款订单
-			const orderType3 = await orderModel.count({ where: { shopid, status: [3, 4] } });
+			const orderType3 = await orderModel.count({ where: { shopid, status: [3, 4], is_delete: 1 } });
 			// 用户未收取订单
-			const orderType4 = await orderModel.count({ where: { shopid, status: [3, 4] } });
+			const orderType4 = await orderModel.count({ where: { shopid, status: [3, 4], is_delete: 1 } });
 			// 已完成订单
-			const orderType5 = await orderModel.count({ where: { shopid, status: 5 } });
+			const orderType5 = await orderModel.count({ where: { shopid, status: 5, is_delete: 1 } });
 			// 上门取衣订单
-			const orderType6 = await orderModel.count({ where: { shopid, status: [6, 8] } });
+			const orderType6 = await orderModel.count({ where: { shopid, status: [6, 8], is_delete: 1 } });
 			// 积分兑换订单
-			const orderType7 = await orderModel.count({ where: { shopid, status: 7 } });
+			const orderType7 = await orderModel.count({ where: { shopid, status: 7, is_delete: 1 } });
 			// 待派送订单
-			const orderType9 = await orderModel.count({ where: { shopid, status: 9 } });
+			const orderType9 = await orderModel.count({ where: { shopid, status: 9, is_delete: 1 } });
 			res.send(resultMessage.success({ orderType1, orderType2, orderType3, orderType4, orderType5, orderType6, orderType7, orderType9 }));
 		} catch (error) {
 			console.log(error);
@@ -107,6 +107,7 @@ module.exports = {
 				where: {
 					shopid,
 					status,
+					is_delete: 1,
 				},
 				include: [
 					{
@@ -152,14 +153,14 @@ module.exports = {
 				item.cabinetBoxId = orders[index].cabinetDetail ? orders[index].cabinetDetail.boxid || '' : '';
 				MoneyUtil.countMoney(item);
 				// 上门取衣
-				if (item.order_type === 2 || item.order_type === 4) {
+				if (Number(item.order_type) === 2 || Number(item.order_type) === 4) {
 					item.home_address = orders[index] ? orders[index].home_address || '' : '';
 					item.home_username = orders[index] ? orders[index].home_username || '' : '';
 					item.home_phone = orders[index] ? orders[index].home_phone || '' : '';
 					item.home_time = orders[index] ? moment(orders[index].home_time).format('YYYY-MM-DD HH:mm:ss') || '' : '';
 				}
 				// 积分兑换
-				if (item.order_type === 3) {
+				if (Number(item.order_type) === 3) {
 					item.intergral_address = orders[index] ? orders[index].intergral_address || '' : '';
 					item.intergral_phone = orders[index] ? orders[index].intergral_phone || '' : '';
 					item.intergral_username = orders[index] ? orders[index].intergral_username || '' : '';
@@ -176,10 +177,9 @@ module.exports = {
 	// 获取某个订单详情
 	getOrderById: async (req, res) => {
 		try {
+			const { id } = req.query;
 			const orderDetail = await orderModel.findOne({
-				where: {
-					id: req.query.id,
-				},
+				where: { id },
 				include: [
 					{
 						model: cabinetModel,
@@ -221,14 +221,14 @@ module.exports = {
 			result.cabinetUrl = orderDetail.cabinetDetail ? orderDetail.cabinetDetail.url : '';
 			MoneyUtil.countMoney(result);
 			// 上门取衣
-			if (result.order_type === 2 || result.order_type === 4) {
+			if (Number(result.order_type) === 2 || Number(result.order_type) === 4) {
 				result.home_address = orderDetail ? orderDetail.home_address || '' : '';
 				result.home_username = orderDetail ? orderDetail.home_username || '' : '';
 				result.home_phone = orderDetail ? orderDetail.home_phone || '' : '';
 				result.home_time = orderDetail ? moment(orderDetail.home_time).format('YYYY-MM-DD HH:mm:ss') || '' : '';
 			}
 			// 积分兑换
-			if (result.order_type === 3) {
+			if (Number(result.order_type) === 3) {
 				result.intergral_address = orderDetail ? orderDetail.intergral_address || '' : '';
 				result.intergral_phone = orderDetail ? orderDetail.intergral_phone || '' : '';
 				result.intergral_username = orderDetail ? orderDetail.intergral_username || '' : '';
@@ -416,7 +416,7 @@ module.exports = {
 	complateClear: async (req, res) => {
 		try {
 			const { orderid } = req.body;
-			await orderModel.update({ status: 4 }, { where: { id: orderid } });
+			await orderModel.update({ status: 3 }, { where: { id: orderid } });
 			res.send(resultMessage.success('success'));
 
 			if (config.send_message_flag === 2) return;
@@ -450,7 +450,7 @@ module.exports = {
 	deleteOrder: async (req, res) => {
 		try {
 			const { orderid } = req.body;
-			await orderModel.destroy({ where: { id: orderid } });
+			await orderModel.update({ is_delete: 2 }, { where: { id: orderid } });
 			res.send(resultMessage.success('success'));
 		} catch (error) {
 			console.log(error);
