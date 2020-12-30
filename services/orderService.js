@@ -400,7 +400,7 @@ module.exports = {
 				desc,
 				order_type: 4,
 				send_people: userid, // 是谁录入的
-				is_sure: 2,
+				is_sure: 1,
 				status: 2,
 				urgency,
 				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
