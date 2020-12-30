@@ -64,7 +64,7 @@ module.exports = {
 					goods = '[]';
 				}
 				// 洗衣柜下单
-				if (orderDetail.order_type === 1) {
+				if (Number(orderDetail.order_type) === 1) {
 					const cabinetDetail = await cabinetModel.findOne({ where: { id: orderDetail.cabinetId } });
 					orderInfo = '<CB>【 MOVING洗衣 】</CB><BR>'; // 标题字体如需居中放大,就需要用标签套上
 					// orderInfo += '<C>-------------</C><BR>'; //标题字体如需居中放大,就需要用标签套上
@@ -94,19 +94,19 @@ module.exports = {
 					orderInfo += `柜子使用费：${Number(orderDetail.pre_pay).toFixed(2)} 元<BR>`;
 					orderInfo += `派送费：${Number(orderDetail.send_money).toFixed(2)} 元<BR>`;
 					orderInfo += `原价：${orderDetail.money} 元<BR>`;
-					if (orderDetail.urgency === 2) {
+					if (Number(orderDetail.urgency) === 2) {
 						orderInfo += `加急费用：${orderDetail.urgencyMoney} 元<BR>`;
 					}
 					orderInfo += `优惠：${orderDetail.subDiscountMoney} 元<BR>`;
 					orderInfo += `应付金额：${orderDetail.payMoney} 元<BR>`;
 					orderInfo += `备注：${orderDetail.desc || '无'}<BR>`;
-					orderInfo += `状态：${orderDetail.is_sure === 1 ? '待确认洗衣价格' : '已确认洗衣费用'}<BR>`;
+					orderInfo += `状态：${Number(orderDetail.is_sure) === 1 ? '待确认洗衣价格' : '已确认洗衣费用'}<BR>`;
 					orderInfo += `下单时间: ${moment().format('YYYY-MM-DD HH:mm:ss')}<BR><BR>`;
 					orderInfo += '<QR>MOVING</QR>';
 				}
 
 				// 上门取衣
-				if (orderDetail.order_type === 2) {
+				if (Number(orderDetail.order_type) === 2) {
 					orderInfo = '<CB>【 MOVING洗衣 】</CB><BR>'; // 标题字体如需居中放大,就需要用标签套上
 					// orderInfo += '<C>-------------</C><BR>'; //标题字体如需居中放大,就需要用标签套上
 					orderInfo += '<BR>';
@@ -140,7 +140,7 @@ module.exports = {
 					orderInfo += `会员类型：${FilterStatus.filterMemberStatus(userDetail.member)}<BR>`;
 					orderInfo += '价格明细：<BR>';
 					orderInfo += `原价：${orderDetail.money} 元<BR>`;
-					if (orderDetail.urgency === 2) {
+					if (Number(orderDetail.urgency) === 2) {
 						orderInfo += `加急费用：${orderDetail.urgencyMoney} 元<BR>`;
 					}
 					orderInfo += `优惠：${orderDetail.subDiscountMoney} 元<BR>`;
@@ -152,7 +152,7 @@ module.exports = {
 				}
 
 				// 积分兑换
-				if (orderDetail.order_type === 3) {
+				if (Number(orderDetail.order_type) === 3) {
 					let goodDetail = orderDetail.goods;
 					goodDetail = JSON.parse(goodDetail);
 					orderInfo = '<CB>【 MOVING洗衣 】</CB><BR>'; // 标题字体如需居中放大,就需要用标签套上
@@ -178,7 +178,7 @@ module.exports = {
 				}
 
 				// 店员录入订单
-				if (orderDetail.order_type === 4) {
+				if (Number(orderDetail.order_type) === 4) {
 					orderInfo = '<CB>【 MOVING洗衣 】</CB><BR>'; // 标题字体如需居中放大,就需要用标签套上
 					// orderInfo += '<C>-------------</C><BR>'; //标题字体如需居中放大,就需要用标签套上
 					orderInfo += '<BR>';
@@ -243,7 +243,7 @@ module.exports = {
 					orderInfo += `联系电话：${userDetail.phone}<BR>`;
 					orderInfo += '价格明细：<BR>';
 					orderInfo += `原价：${orderDetail.money} 元<BR>`;
-					if (orderDetail.urgency === 2) {
+					if (Number(orderDetail.urgency) === 2) {
 						orderInfo += `加急费用：${orderDetail.urgencyMoney} 元<BR>`;
 					}
 					orderInfo += `优惠：${orderDetail.subDiscountMoney} 元<BR>`;
