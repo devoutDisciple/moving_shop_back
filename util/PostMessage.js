@@ -25,7 +25,7 @@ module.exports = {
 		return new Promise((resolve, reject) => {
 			client.request('SendSms', params, requestOption).then(
 				(result) => {
-					console.log(JSON.stringify(result));
+					console.log(JSON.stringify(result), '发送失败');
 					resolve({ phoneNum, code });
 				},
 				(ex) => {
