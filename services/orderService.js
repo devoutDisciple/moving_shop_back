@@ -32,6 +32,8 @@ const PostMessage = require('../util/PostMessage');
 
 const config = require('../config/AppConfig');
 
+const timeout = 5000;
+
 module.exports = {
 	// 获取订单统计销量和总金额
 	getAllSalesNum: async (req, res) => {
@@ -47,7 +49,9 @@ module.exports = {
 			});
 			const orderSendMoneyTotalMoney = await orderModel.sum('send_money', { where: { shopid, status: 5, is_delete: 1 } });
 			const totalMoney = (Number(orderMoneyTotalMoney) + Number(orderSendMoneyTotalMoney)).toFixed(2);
-			res.send(resultMessage.success({ orderTotalNum, totalMoney }));
+			setTimeout(() => {
+				res.send(resultMessage.success({ orderTotalNum, totalMoney }));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error({}));
@@ -75,7 +79,9 @@ module.exports = {
 			const orderType7 = await orderModel.count({ where: { shopid, status: 7, is_delete: 1 } });
 			// 待派送订单
 			const orderType9 = await orderModel.count({ where: { shopid, status: 9, is_delete: 1 } });
-			res.send(resultMessage.success({ orderType1, orderType2, orderType3, orderType4, orderType5, orderType6, orderType7, orderType9 }));
+			setTimeout(() => {
+				res.send(resultMessage.success({ orderType1, orderType2, orderType3, orderType4, orderType5, orderType6, orderType7, orderType9 }));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error({}));
@@ -87,7 +93,9 @@ module.exports = {
 		try {
 			const { orderid, status } = req.body;
 			await orderModel.update({ status }, { where: { id: orderid } });
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -167,7 +175,9 @@ module.exports = {
 					item.intergral_num = orders[index] ? orders[index].intergral_num || '' : '';
 				}
 			});
-			res.send(resultMessage.success(result));
+			setTimeout(() => {
+				res.send(resultMessage.success(result));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -242,7 +252,9 @@ module.exports = {
 			result.userDetail.age = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.age : '';
 			result.userDetail.member = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.member : '';
 			result.userDetail.sex = orderDetail && orderDetail.userDetail ? orderDetail.userDetail.member : '';
-			res.send(resultMessage.success(result));
+			setTimeout(() => {
+				res.send(resultMessage.success(result));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -277,7 +289,9 @@ module.exports = {
 			);
 			// 更新订单状态
 			await orderModel.update({ status }, { where: { id: orderId } });
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -303,7 +317,6 @@ module.exports = {
 			}
 			// 打开后可用的格子的数量
 			const used = result.used;
-			console.log(used);
 			// 更新可用格子状态
 			await cabinetModel.update(
 				{ used: JSON.stringify(used) },
@@ -324,7 +337,9 @@ module.exports = {
 				},
 				{ where: { id: orderId } },
 			);
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 
 			if (config.send_message_flag === 2) return;
 
@@ -357,7 +372,9 @@ module.exports = {
 				},
 				{ where: { id: orderId } },
 			);
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 
 			if (config.send_message_flag === 2) return;
 
@@ -377,7 +394,9 @@ module.exports = {
 		try {
 			const { orderid } = req.body;
 			await orderModel.update({ send_home: 2, status: 3 }, { where: { id: orderid } });
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -405,7 +424,9 @@ module.exports = {
 				urgency,
 				create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
 			});
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
@@ -417,10 +438,11 @@ module.exports = {
 		try {
 			const { orderid } = req.body;
 			await orderModel.update({ status: 3 }, { where: { id: orderid } });
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 
 			if (config.send_message_flag === 2) return;
-
 			const orderDetail = await orderUtil.getOrderPhoneToUser(orderid);
 			if (!orderDetail.phone) return;
 			PostMessage.sendMessageSuccessClearToUser(orderDetail.phone);
@@ -435,7 +457,9 @@ module.exports = {
 		try {
 			const { orderid } = req.body;
 			await orderModel.update({ status: 5 }, { where: { id: orderid } });
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 			if (config.send_message_flag === 2) return;
 			const orderDetail = await orderUtil.getOrderPhoneToUser(orderid);
 			if (!orderDetail.phone) return;
@@ -451,7 +475,9 @@ module.exports = {
 		try {
 			const { orderid } = req.body;
 			await orderModel.update({ is_delete: 2 }, { where: { id: orderid } });
-			res.send(resultMessage.success('success'));
+			setTimeout(() => {
+				res.send(resultMessage.success('success'));
+			}, timeout);
 		} catch (error) {
 			console.log(error);
 			return res.send(resultMessage.error('网络出小差了, 请稍后重试'));
