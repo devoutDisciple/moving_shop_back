@@ -32,7 +32,7 @@ const PostMessage = require('../util/PostMessage');
 
 const config = require('../config/AppConfig');
 
-const timeout = 5000;
+const timeout = 0;
 
 module.exports = {
 	// 获取订单统计销量和总金额

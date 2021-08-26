@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
 	return sequelize.define(
-		'account',
+		'advertising',
 		{
 			id: {
 				autoIncrement: true,
@@ -10,50 +10,36 @@ module.exports = (sequelize) => {
 				allowNull: false,
 				primaryKey: true,
 			},
-			name: {
-				type: Sequelize.STRING(255),
-				allowNull: true,
-				comment: '账号所属人',
-			},
-			phone: {
-				type: Sequelize.STRING(255),
-				allowNull: true,
-				comment: '用户手机号',
-			},
-			username: {
+			url: {
 				type: Sequelize.STRING(255),
 				allowNull: false,
-			},
-			password: {
-				type: Sequelize.STRING(255),
-				allowNull: false,
+				comment: '广告图片url',
 			},
 			shopid: {
 				type: Sequelize.INTEGER,
 				allowNull: false,
+				comment: '商铺id',
 			},
-			role: {
+			sort: {
 				type: Sequelize.INTEGER,
 				allowNull: true,
-				defaultValue: 2,
-				comment: '1 超级管理员 2 商家 3 店员',
-			},
-			send_message: {
-				type: Sequelize.INTEGER,
-				allowNull: false,
 				defaultValue: 1,
-				comment: '1-发送短信 2-不发送',
+				comment: '排序',
 			},
 			is_delete: {
-				type: Sequelize.STRING(255),
-				allowNull: false,
-				defaultValue: '1',
-				comment: '1 存在 2 删除',
+				type: Sequelize.INTEGER,
+				allowNull: true,
+				defaultValue: 1,
+				comment: '1-存在 2-删除',
+			},
+			create_time: {
+				type: Sequelize.DATE,
+				allowNull: true,
 			},
 		},
 		{
 			sequelize,
-			tableName: 'account',
+			tableName: 'advertising',
 			timestamps: false,
 			indexes: [
 				{
