@@ -80,7 +80,18 @@ module.exports = {
 			// 待派送订单
 			const orderType9 = await orderModel.count({ where: { shopid, status: 9, is_delete: 1 } });
 			setTimeout(() => {
-				res.send(resultMessage.success({ orderType1, orderType2, orderType3, orderType4, orderType5, orderType6, orderType7, orderType9 }));
+				res.send(
+					resultMessage.success({
+						orderType1,
+						orderType2,
+						orderType3,
+						orderType4,
+						orderType5,
+						orderType6,
+						orderType7,
+						orderType9,
+					}),
+				);
 			}, timeout);
 		} catch (error) {
 			console.log(error);

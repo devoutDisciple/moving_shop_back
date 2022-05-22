@@ -5,9 +5,8 @@ const chalk = require('chalk');
 const cookieParser = require('cookie-parser');
 const sessionParser = require('express-session');
 const bodyParser = require('body-parser');
-const path = require('path');
 const controller = require('./controller/index');
-const config = require('./config/Env');
+const config = require('./config/AppConfig');
 const ChangeLog = require('./middleware/ChangeLog');
 const LogMiddleware = require('./middleware/LogMiddleware');
 
@@ -26,7 +25,7 @@ app.use(
 	}),
 );
 
-app.use(express.static(config.env ? '/root/asserts' : path.join(__dirname, '../asserts')));
+app.use(express.static(config.STATIC_PATH));
 
 app.use((req, res, next) => {
 	if (req.url === '/pay/getAlipayResult') {
@@ -69,7 +68,6 @@ controller(app);
 // console.log(chalk.yellow('moving洗衣店：server is listenning 443'));
 // });
 
-// 监听3001端口
-app.listen(3002, () => {
-	console.log(chalk.yellow('moving商家端：server is listenning 3002'));
+app.listen(config.SERVER_PORD, () => {
+	console.log(chalk.yellow(`moving：server is listenning ${config.SERVER_PORD}`));
 });
